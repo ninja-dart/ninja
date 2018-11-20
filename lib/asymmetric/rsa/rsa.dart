@@ -1,9 +1,13 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:pointycastle/pointycastle.dart' as pointy;
-import 'package:pointycastle/export.dart';
+// import 'package:pointycastle/pointycastle.dart' as pointy;
+// import 'package:pointycastle/export.dart';
 import 'package:ninja/utils/hex_string.dart';
+import 'package:ninja/utils/big_int.dart';
 
+part 'engine.dart';
+
+/// Public key for RSA encryption
 class RSAPublicKey {
   /// Modulus
   final BigInt n;
@@ -14,6 +18,7 @@ class RSAPublicKey {
   RSAPublicKey(this.n, this.e);
 }
 
+/// Private key for RSA encryption
 class RSAPrivateKey implements RSAPublicKey {
   /// Modulus
   final BigInt n;
@@ -40,15 +45,8 @@ class RSAEncoder extends Converter<String, String> {
 
   @override
   String convert(String input) {
-    var engine = RSAEngine();
-    engine.reset();
-    engine.init(
-        true,
-        PublicKeyParameter<pointy.RSAPublicKey>(
-            pointy.RSAPublicKey(key.n, key.e)));
-
+    var engine = RSAEncryptionEngine(key);
     Uint8List output = engine.process(Uint8List.fromList(input.codeUnits));
-
     return hexStringDecoder.convert(output);
   }
 }
@@ -60,15 +58,8 @@ class RSADecoder extends Converter<String, String> {
 
   @override
   String convert(String input) {
-    var engine = RSAEngine();
-    engine.reset();
-    engine.init(
-        false,
-        PrivateKeyParameter<pointy.RSAPrivateKey>(
-            pointy.RSAPrivateKey(key.n, key.d, key.p, key.q)));
-
+    var engine = RSADecryptionEngine(key);
     Uint8List output = engine.process(hexStringEncoder.convert(input));
-
     return String.fromCharCodes(output);
   }
 }
@@ -86,7 +77,7 @@ class RSA extends Codec<String, String> {
 
   @override
   String decode(String encoded) {
-    if(decoder == null) throw Exception('Do not have Private key!');
+    if (decoder == null) throw Exception('Do not have Private key!');
     return super.decode(encoded);
   }
 }

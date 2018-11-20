@@ -1,26 +1,28 @@
 import 'dart:convert';
 import 'dart:typed_data';
-import 'package:pointycastle/pointycastle.dart' as pointy;
-import 'package:pointycastle/export.dart' as pointy;
 import 'package:ninja/utils/hex_string.dart';
 import 'package:ninja/ninja.dart';
+import 'package:ninja/utils/ufixnum.dart';
+
+part 'engine.dart';
 
 class AESEncoder extends Converter<String, String> {
-  final Uint8List key;
+  final Uint8List keyBytes;
 
   final Padder padder;
 
-  final _cipher = pointy.AESFastEngine();
+  AESFastEncryptionEngine _cipher;
 
-  AESEncoder(String key, {this.padder: const PKCS7Padder()})
-      : key = Uint8List.fromList(key.codeUnits);
+  factory AESEncoder(String key, {Padder padder: const PKCS7Padder()}) =>
+      AESEncoder.fromBytes(Uint8List.fromList(key.codeUnits), padder: padder);
 
-  AESEncoder.fromBytes(this.key, {this.padder: const PKCS7Padder()});
+  AESEncoder.fromBytes(this.keyBytes, {this.padder: const PKCS7Padder()}) {
+    _cipher = AESFastEncryptionEngine(keyBytes);
+  }
 
   @override
   String convert(String input) {
     _cipher.reset();
-    _cipher.init(true, pointy.KeyParameter(key));
 
     final inputBytes = Uint8List.fromList(input.codeUnits);
     Padded padded = padder.pad(_cipher.blockSize, inputBytes);
@@ -37,21 +39,22 @@ class AESEncoder extends Converter<String, String> {
 }
 
 class AESDecoder extends Converter<String, String> {
-  final Uint8List key;
+  final Uint8List keyBytes;
 
   final Padder padder;
 
-  final _cipher = pointy.AESFastEngine();
+  AESFastDecryptionEngine _cipher;
 
-  AESDecoder(String key, {this.padder: const PKCS7Padder()})
-      : key = Uint8List.fromList(key.codeUnits);
+  factory AESDecoder(String key, {Padder padder: const PKCS7Padder()}) =>
+      AESDecoder.fromBytes(Uint8List.fromList(key.codeUnits), padder: padder);
 
-  AESDecoder.fromBytes(this.key, {this.padder: const PKCS7Padder()});
+  AESDecoder.fromBytes(this.keyBytes, {this.padder: const PKCS7Padder()}) {
+    _cipher = AESFastDecryptionEngine(keyBytes);
+  }
 
   @override
   String convert(String input) {
     _cipher.reset();
-    _cipher.init(false, pointy.KeyParameter(key));
 
     final inputBytes = hexStringEncoder.convert(input);
 
