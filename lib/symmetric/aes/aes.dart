@@ -13,10 +13,10 @@ class AESEncoder extends Converter<String, String> {
 
   AESFastEncryptionEngine _cipher;
 
-  factory AESEncoder(String key, {Padder padder: const PKCS7Padder()}) =>
+  factory AESEncoder(String key, {Padder padder = const PKCS7Padder()}) =>
       AESEncoder.fromBytes(Uint8List.fromList(key.codeUnits), padder: padder);
 
-  AESEncoder.fromBytes(this.keyBytes, {this.padder: const PKCS7Padder()}) {
+  AESEncoder.fromBytes(this.keyBytes, {this.padder = const PKCS7Padder()}) {
     _cipher = AESFastEncryptionEngine(keyBytes);
   }
 
@@ -45,10 +45,10 @@ class AESDecoder extends Converter<String, String> {
 
   AESFastDecryptionEngine _cipher;
 
-  factory AESDecoder(String key, {Padder padder: const PKCS7Padder()}) =>
+  factory AESDecoder(String key, {Padder padder = const PKCS7Padder()}) =>
       AESDecoder.fromBytes(Uint8List.fromList(key.codeUnits), padder: padder);
 
-  AESDecoder.fromBytes(this.keyBytes, {this.padder: const PKCS7Padder()}) {
+  AESDecoder.fromBytes(this.keyBytes, {this.padder = const PKCS7Padder()}) {
     _cipher = AESFastDecryptionEngine(keyBytes);
   }
 
@@ -75,10 +75,10 @@ class AES extends Codec<String, String> {
   @override
   final AESDecoder decoder;
 
-  factory AES(String key, {Padder padder: const PKCS7Padder()}) =>
+  factory AES(String key, {Padder padder = const PKCS7Padder()}) =>
       AES.fromBytes(Uint8List.fromList(key.codeUnits), padder: padder);
 
-  factory AES.fromBytes(Uint8List key, {Padder padder: const PKCS7Padder()}) {
+  factory AES.fromBytes(Uint8List key, {Padder padder = const PKCS7Padder()}) {
     var keyBytes = Uint8List.fromList(key);
     return AES.from(AESEncoder.fromBytes(keyBytes, padder: padder),
         AESDecoder.fromBytes(keyBytes, padder: padder));

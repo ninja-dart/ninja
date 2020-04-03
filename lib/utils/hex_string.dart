@@ -6,8 +6,8 @@ class HexStringEncoder extends Converter<String, Uint8List> {
 
   @override
   Uint8List convert(String input) {
-    var result = new Uint8List(input.length ~/ 2);
-    for (var i = 0; i < input.length; i += 2) {
+    final result = Uint8List(input.length ~/ 2);
+    for (int i = 0; i < input.length; i += 2) {
       var num = input.substring(i, i + 2);
       var byte = int.parse(num, radix: 16);
       result[i ~/ 2] = byte;
@@ -21,8 +21,8 @@ class HexStringDecoder extends Converter<Uint8List, String> {
 
   @override
   String convert(Uint8List input) {
-    var result = StringBuffer();
-    for (var i = 0; i < input.lengthInBytes; i++) {
+    final result = StringBuffer();
+    for (int i = 0; i < input.lengthInBytes; i++) {
       int part = input[i];
       result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
     }

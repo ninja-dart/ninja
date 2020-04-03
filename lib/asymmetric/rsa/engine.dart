@@ -31,17 +31,18 @@ class RSAEncryptionEngine {
   BigInt _convertInput(Uint8List inp, int inpOff, int len) {
     int inpLen = inp.length;
 
-    if (inpLen > (inputBlockSize + 1))
+    if (inpLen > (inputBlockSize + 1)) {
       throw ArgumentError("Input too large for RSA cipher");
+    }
 
-    BigInt res = decodeBigInt(inp.sublist(inpOff, inpOff + len));
+    BigInt res = bytesToBigInt(inp.sublist(inpOff, inpOff + len));
     if (res >= key.n) throw ArgumentError("Input too large for RSA cipher");
 
     return res;
   }
 
   int _convertOutput(BigInt result, Uint8List out, int outOff) {
-    final Uint8List output = encodeBigInt(result);
+    final Uint8List output = bigIntToBytes(result);
 
     if ((output[0] == 0) && (output.length > outputBlockSize)) {
       // have ended up with an extra zero byte, copy down.
@@ -97,20 +98,22 @@ class RSADecryptionEngine {
   BigInt _convertInput(Uint8List inp, int inpOff, int len) {
     var inpLen = inp.length;
 
-    if (inpLen > (inputBlockSize + 1))
+    if (inpLen > (inputBlockSize + 1)) {
       throw ArgumentError("Input too large for RSA cipher");
+    }
 
-    if ((inpLen == (inputBlockSize + 1)))
+    if ((inpLen == (inputBlockSize + 1))) {
       throw ArgumentError("Input too large for RSA cipher");
+    }
 
-    BigInt res = decodeBigInt(inp.sublist(inpOff, inpOff + len));
+    BigInt res = bytesToBigInt(inp.sublist(inpOff, inpOff + len));
     if (res >= _key.n) throw ArgumentError("Input too large for RSA cipher");
 
     return res;
   }
 
   int _convertOutput(BigInt result, Uint8List out, int outOff) {
-    final Uint8List output = encodeBigInt(result);
+    final Uint8List output = bigIntToBytes(result);
 
     if (output[0] == 0) {
       // Have ended up with an extra zero byte, copy down.

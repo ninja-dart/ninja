@@ -4,27 +4,25 @@ part of 'aes.dart';
 // modified from pointy_castles package. See file LICENSE/pointy_castle_LICENSE
 // file for more information.
 
-/**
- * An implementation of the AES (Rijndael), from FIPS-197.
- *
- * This implementation is based on optimizations from Dr. Brian Gladman's paper
- * and C code at [http://fp.gladman.plus.com/cryptography_technology/rijndael/]
- *
- * There are three levels of tradeoff of speed vs memory and they are written
- * as three separate classes from which to choose.
- *
- * The fastest uses 8Kbytes of static tables to precompute round calculations,
- * 4 256 word tables for encryption and 4 for decryption.
- *
- * The middle performance version uses only one 256 word table for each, for a
- * total of 2Kbytes, adding 12 rotate operations per round to compute the values
- * contained in the other tables from the contents of the first.
- *
- * The slowest version uses no static tables at all and computes the values in
- * each round.
- * This file contains the fast version with 8Kbytes of static tables for round
- * precomputation.
- */
+/// An implementation of the AES (Rijndael), from FIPS-197.
+///
+/// This implementation is based on optimizations from Dr. Brian Gladman's paper
+/// and C code at [http://fp.gladman.plus.com/cryptography_technology/rijndael/]
+///
+/// There are three levels of tradeoff of speed vs memory and they are written
+/// as three separate classes from which to choose.
+///
+/// The fastest uses 8Kbytes of static tables to precompute round calculations,
+/// 4 256 word tables for encryption and 4 for decryption.
+///
+/// The middle performance version uses only one 256 word table for each, for a
+/// total of 2Kbytes, adding 12 rotate operations per round to compute the values
+/// contained in the other tables from the contents of the first.
+///
+/// The slowest version uses no static tables at all and computes the values in
+/// each round.
+/// This file contains the fast version with 8Kbytes of static tables for round
+/// precomputation.
 abstract class AESFastEngineCommon {
   int get _rounds;
   int get _c0;
@@ -79,7 +77,7 @@ class AESFastEncryptionEngine extends AESFastEngineCommon {
     final int _rounds = KC +
         6; // This is not always true for the generalized Rijndael that allows larger block sizes
     final List<List<int>> _workingKey = List.generate(
-        _rounds + 1, (int i) => new List<int>(4)); // 4 words in a block
+        _rounds + 1, (int i) => List<int>(4)); // 4 words in a block
 
     // Copy the key into the round key array.
     var keyView = ByteData.view(key.buffer, key.offsetInBytes, key.length);
@@ -112,11 +110,13 @@ class AESFastEncryptionEngine extends AESFastEngineCommon {
   }
 
   int processBlock(Uint8List inp, int inpOff, Uint8List out, int outOff) {
-    if ((inpOff + (32 / 2)) > inp.lengthInBytes)
+    if ((inpOff + (32 / 2)) > inp.lengthInBytes) {
       throw ArgumentError("Input buffer too short");
+    }
 
-    if ((outOff + (32 / 2)) > out.lengthInBytes)
+    if ((outOff + (32 / 2)) > out.lengthInBytes) {
       throw ArgumentError("Output buffer too short");
+    }
 
     var inpView = ByteData.view(inp.buffer, inp.offsetInBytes, inp.length);
     var outView = ByteData.view(out.buffer, out.offsetInBytes, out.length);
@@ -289,11 +289,13 @@ class AESFastDecryptionEngine extends AESFastEngineCommon {
   }
 
   int processBlock(Uint8List inp, int inpOff, Uint8List out, int outOff) {
-    if ((inpOff + (32 / 2)) > inp.lengthInBytes)
+    if ((inpOff + (32 / 2)) > inp.lengthInBytes) {
       throw ArgumentError("Input buffer too short");
+    }
 
-    if ((outOff + (32 / 2)) > out.lengthInBytes)
+    if ((outOff + (32 / 2)) > out.lengthInBytes) {
       throw ArgumentError("Output buffer too short");
+    }
 
     var inpView = ByteData.view(inp.buffer, inp.offsetInBytes, inp.length);
     var outView = ByteData.view(out.buffer, out.offsetInBytes, out.length);
@@ -316,91 +318,91 @@ class AESFastDecryptionEngine extends AESFastEngineCommon {
     r = _rounds - 1;
     while (r > 1) {
       r0 = _Tinv0[_c0 & 255] ^
-      _Tinv1[(_c3 >> 8) & 255] ^
-      _Tinv2[(_c2 >> 16) & 255] ^
-      _Tinv3[(_c1 >> 24) & 255] ^
-      KW[r][0].toInt();
+          _Tinv1[(_c3 >> 8) & 255] ^
+          _Tinv2[(_c2 >> 16) & 255] ^
+          _Tinv3[(_c1 >> 24) & 255] ^
+          KW[r][0].toInt();
       r1 = _Tinv0[_c1 & 255] ^
-      _Tinv1[(_c0 >> 8) & 255] ^
-      _Tinv2[(_c3 >> 16) & 255] ^
-      _Tinv3[(_c2 >> 24) & 255] ^
-      KW[r][1].toInt();
+          _Tinv1[(_c0 >> 8) & 255] ^
+          _Tinv2[(_c3 >> 16) & 255] ^
+          _Tinv3[(_c2 >> 24) & 255] ^
+          KW[r][1].toInt();
       r2 = _Tinv0[_c2 & 255] ^
-      _Tinv1[(_c1 >> 8) & 255] ^
-      _Tinv2[(_c0 >> 16) & 255] ^
-      _Tinv3[(_c3 >> 24) & 255] ^
-      KW[r][2].toInt();
+          _Tinv1[(_c1 >> 8) & 255] ^
+          _Tinv2[(_c0 >> 16) & 255] ^
+          _Tinv3[(_c3 >> 24) & 255] ^
+          KW[r][2].toInt();
       r3 = _Tinv0[_c3 & 255] ^
-      _Tinv1[(_c2 >> 8) & 255] ^
-      _Tinv2[(_c1 >> 16) & 255] ^
-      _Tinv3[(_c0 >> 24) & 255] ^
-      KW[r][3].toInt();
+          _Tinv1[(_c2 >> 8) & 255] ^
+          _Tinv2[(_c1 >> 16) & 255] ^
+          _Tinv3[(_c0 >> 24) & 255] ^
+          KW[r][3].toInt();
       r--;
       _c0 = _Tinv0[r0 & 255] ^
-      _Tinv1[(r3 >> 8) & 255] ^
-      _Tinv2[(r2 >> 16) & 255] ^
-      _Tinv3[(r1 >> 24) & 255] ^
-      KW[r][0].toInt();
+          _Tinv1[(r3 >> 8) & 255] ^
+          _Tinv2[(r2 >> 16) & 255] ^
+          _Tinv3[(r1 >> 24) & 255] ^
+          KW[r][0].toInt();
       _c1 = _Tinv0[r1 & 255] ^
-      _Tinv1[(r0 >> 8) & 255] ^
-      _Tinv2[(r3 >> 16) & 255] ^
-      _Tinv3[(r2 >> 24) & 255] ^
-      KW[r][1].toInt();
+          _Tinv1[(r0 >> 8) & 255] ^
+          _Tinv2[(r3 >> 16) & 255] ^
+          _Tinv3[(r2 >> 24) & 255] ^
+          KW[r][1].toInt();
       _c2 = _Tinv0[r2 & 255] ^
-      _Tinv1[(r1 >> 8) & 255] ^
-      _Tinv2[(r0 >> 16) & 255] ^
-      _Tinv3[(r3 >> 24) & 255] ^
-      KW[r][2].toInt();
+          _Tinv1[(r1 >> 8) & 255] ^
+          _Tinv2[(r0 >> 16) & 255] ^
+          _Tinv3[(r3 >> 24) & 255] ^
+          KW[r][2].toInt();
       _c3 = _Tinv0[r3 & 255] ^
-      _Tinv1[(r2 >> 8) & 255] ^
-      _Tinv2[(r1 >> 16) & 255] ^
-      _Tinv3[(r0 >> 24) & 255] ^
-      KW[r][3].toInt();
+          _Tinv1[(r2 >> 8) & 255] ^
+          _Tinv2[(r1 >> 16) & 255] ^
+          _Tinv3[(r0 >> 24) & 255] ^
+          KW[r][3].toInt();
       r--;
     }
 
     r0 = _Tinv0[_c0 & 255] ^
-    _Tinv1[(_c3 >> 8) & 255] ^
-    _Tinv2[(_c2 >> 16) & 255] ^
-    _Tinv3[(_c1 >> 24) & 255] ^
-    KW[r][0].toInt();
+        _Tinv1[(_c3 >> 8) & 255] ^
+        _Tinv2[(_c2 >> 16) & 255] ^
+        _Tinv3[(_c1 >> 24) & 255] ^
+        KW[r][0].toInt();
     r1 = _Tinv0[_c1 & 255] ^
-    _Tinv1[(_c0 >> 8) & 255] ^
-    _Tinv2[(_c3 >> 16) & 255] ^
-    _Tinv3[(_c2 >> 24) & 255] ^
-    KW[r][1].toInt();
+        _Tinv1[(_c0 >> 8) & 255] ^
+        _Tinv2[(_c3 >> 16) & 255] ^
+        _Tinv3[(_c2 >> 24) & 255] ^
+        KW[r][1].toInt();
     r2 = _Tinv0[_c2 & 255] ^
-    _Tinv1[(_c1 >> 8) & 255] ^
-    _Tinv2[(_c0 >> 16) & 255] ^
-    _Tinv3[(_c3 >> 24) & 255] ^
-    KW[r][2].toInt();
+        _Tinv1[(_c1 >> 8) & 255] ^
+        _Tinv2[(_c0 >> 16) & 255] ^
+        _Tinv3[(_c3 >> 24) & 255] ^
+        KW[r][2].toInt();
     r3 = _Tinv0[_c3 & 255] ^
-    _Tinv1[(_c2 >> 8) & 255] ^
-    _Tinv2[(_c1 >> 16) & 255] ^
-    _Tinv3[(_c0 >> 24) & 255] ^
-    KW[r][3].toInt();
+        _Tinv1[(_c2 >> 8) & 255] ^
+        _Tinv2[(_c1 >> 16) & 255] ^
+        _Tinv3[(_c0 >> 24) & 255] ^
+        KW[r][3].toInt();
 
     // the final round's table is a simple function of Si so we don't use a whole other four tables for it
     _c0 = (_Si[r0 & 255] & 255) ^
-    ((_Si[(r3 >> 8) & 255] & 255) << 8) ^
-    ((_Si[(r2 >> 16) & 255] & 255) << 16) ^
-    (_Si[(r1 >> 24) & 255] << 24) ^
-    KW[0][0].toInt();
+        ((_Si[(r3 >> 8) & 255] & 255) << 8) ^
+        ((_Si[(r2 >> 16) & 255] & 255) << 16) ^
+        (_Si[(r1 >> 24) & 255] << 24) ^
+        KW[0][0].toInt();
     _c1 = (_Si[r1 & 255] & 255) ^
-    ((_Si[(r0 >> 8) & 255] & 255) << 8) ^
-    ((_Si[(r3 >> 16) & 255] & 255) << 16) ^
-    (_Si[(r2 >> 24) & 255] << 24) ^
-    KW[0][1].toInt();
+        ((_Si[(r0 >> 8) & 255] & 255) << 8) ^
+        ((_Si[(r3 >> 16) & 255] & 255) << 16) ^
+        (_Si[(r2 >> 24) & 255] << 24) ^
+        KW[0][1].toInt();
     _c2 = (_Si[r2 & 255] & 255) ^
-    ((_Si[(r1 >> 8) & 255] & 255) << 8) ^
-    ((_Si[(r0 >> 16) & 255] & 255) << 16) ^
-    (_Si[(r3 >> 24) & 255] << 24) ^
-    KW[0][2].toInt();
+        ((_Si[(r1 >> 8) & 255] & 255) << 8) ^
+        ((_Si[(r0 >> 16) & 255] & 255) << 16) ^
+        (_Si[(r3 >> 24) & 255] << 24) ^
+        KW[0][2].toInt();
     _c3 = (_Si[r3 & 255] & 255) ^
-    ((_Si[(r2 >> 8) & 255] & 255) << 8) ^
-    ((_Si[(r1 >> 16) & 255] & 255) << 16) ^
-    (_Si[(r0 >> 24) & 255] << 24) ^
-    KW[0][3].toInt();
+        ((_Si[(r2 >> 8) & 255] & 255) << 8) ^
+        ((_Si[(r1 >> 16) & 255] & 255) << 16) ^
+        (_Si[(r0 >> 24) & 255] << 24) ^
+        KW[0][3].toInt();
   }
 }
 
