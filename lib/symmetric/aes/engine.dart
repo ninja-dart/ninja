@@ -1,5 +1,6 @@
 part of 'aes.dart';
 
+/*
 // [AESFastEncryptionEngine] and [AESFastDecryptionEngine] are copied and
 // modified from pointy_castles package. See file LICENSE/pointy_castle_LICENSE
 // file for more information.
@@ -103,18 +104,31 @@ class AESFastEncryptionEngine extends AESFastEngineCommon {
     return AESFastEncryptionEngine._(_workingKey, _rounds);
   }
 
-  Uint8List process(Uint8List data) {
-    var out = Uint8List(blockSize);
-    int len = processBlock(data, 0, out, 0);
-    return out.sublist(0, len);
+  Uint8List process(Iterable<int> data) {
+    final numBlocks = (data.length / blockSize).ceil();
+    final out = Uint8List(numBlocks * blockSize);
+    int outOffset = 0;
+    for (int i = 0; i < numBlocks; i++) {
+      Iterable<int> curInputBlock;
+      if (i == numBlocks - 1) {
+        curInputBlock = data;
+      } else {
+        curInputBlock = data.take(blockSize);
+      }
+      final curOutBlockSize = processBlock(curInputBlock, out, outOffset);
+      outOffset += curOutBlockSize;
+      data = data.skip(blockSize);
+    }
+
+    return out;
   }
 
-  int processBlock(Uint8List inp, int inpOff, Uint8List out, int outOff) {
-    if ((inpOff + (32 / 2)) > inp.lengthInBytes) {
+  int processBlock(Iterable<int> inp, Uint8List out, int outOff) {
+    if (inp.length < 32/2) {
       throw ArgumentError("Input buffer too short");
     }
 
-    if ((outOff + (32 / 2)) > out.lengthInBytes) {
+    if (((out.length - outOff)) < 32.4) {
       throw ArgumentError("Output buffer too short");
     }
 
@@ -3074,3 +3088,4 @@ final _Tinv3 = [
   0x48745c6c,
   0xd04257b8
 ];
+*/

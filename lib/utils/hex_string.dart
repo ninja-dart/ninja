@@ -1,8 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-class HexStringEncoder extends Converter<String, Uint8List> {
-  const HexStringEncoder();
+class HexStringDecoder extends Converter<String, Uint8List> {
+  const HexStringDecoder();
 
   @override
   Uint8List convert(String input) {
@@ -16,32 +16,31 @@ class HexStringEncoder extends Converter<String, Uint8List> {
   }
 }
 
-class HexStringDecoder extends Converter<Uint8List, String> {
-  const HexStringDecoder();
+class HexStringEncoder extends Converter<Iterable<int>, String> {
+  const HexStringEncoder();
 
   @override
-  String convert(Uint8List input) {
+  String convert(Iterable<int> input) {
     final result = StringBuffer();
-    for (int i = 0; i < input.lengthInBytes; i++) {
-      int part = input[i];
+    for (int part in input) {
       result.write('${part < 16 ? '0' : ''}${part.toRadixString(16)}');
     }
     return result.toString();
   }
 }
 
-class HexString extends Codec<String, Uint8List> {
-  const HexString();
+class HexCodec extends Codec<Iterable<int>, String> {
+  const HexCodec();
 
   @override
-  Converter<String, Uint8List> get encoder => hexStringEncoder;
+  Converter<Iterable<int>, String> get encoder => hexEncoder;
 
   @override
-  Converter<Uint8List, String> get decoder => hexStringDecoder;
+  Converter<String, Uint8List> get decoder => hexDecoder;
 }
 
-const hexStringEncoder = HexStringEncoder();
+const hexDecoder = HexStringDecoder();
 
-const hexStringDecoder = HexStringDecoder();
+const hexEncoder = HexStringEncoder();
 
-const hexString = HexString();
+const hexCodec = HexCodec();

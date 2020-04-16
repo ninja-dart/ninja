@@ -5,25 +5,34 @@ import 'dart:typed_data';
 // LICENSE/pointy_castle_LICENSE file for more information.
 
 /// Decode a BigInt from bytes in big-endian encoding.
-BigInt bytesToBigInt(List<int> bytes) {
+BigInt bytesToBigInt(Iterable<int> bytes) {
   BigInt result = BigInt.from(0);
-  for (int i = 0; i < bytes.length; i++) {
-    result += BigInt.from(bytes[bytes.length - i - 1]) << (8 * i);
+
+  for(int byte in bytes) {
+    result = result << 8;
+    result |= BigInt.from(byte);
   }
+
   return result;
 }
 
 /// Encode a BigInt into bytes using big-endian encoding.
-Uint8List bigIntToBytes(BigInt number) {
-  // Not handling negative numbers. Decide how you want to do that.
+Uint8List bigIntToBytes(BigInt number, {int outLen}) {
   int size = (number.bitLength + 7) >> 3;
-  var result = Uint8List(size);
+  if(outLen == null) {
+    outLen = size;
+  } else if(outLen < size) {
+    throw Exception('Number too large');
+  }
+  final result = Uint8List(outLen);
+  int pos = outLen - 1;
   for (int i = 0; i < size; i++) {
-    result[size - i - 1] = (number & _byteMask).toInt();
+    result[pos--] = (number & _byteMask).toInt();
     number = number >> 8;
   }
   return result;
 }
+// Not handling negative numbers. Decide how you want to do that.
 
 final _byteMask = BigInt.from(0xff);
 

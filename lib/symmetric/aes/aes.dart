@@ -6,6 +6,7 @@ import 'package:ninja/utils/ufixnum.dart';
 
 part 'engine.dart';
 
+/*
 class AESEncoder extends Converter<String, String> {
   final Uint8List keyBytes;
 
@@ -86,3 +87,4 @@ class AES extends Codec<String, String> {
 
   AES.from(this.encoder, this.decoder);
 }
+*/
