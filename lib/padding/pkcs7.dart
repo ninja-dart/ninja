@@ -5,7 +5,11 @@ import 'padding.dart';
 class PKCS7Padder implements Padder {
   final int blockSize;
 
-  PKCS7Padder(this.blockSize);
+  PKCS7Padder(this.blockSize) {
+    if(blockSize > 255) {
+      throw Exception('PKCS #7 only supports block sizes less than 256');
+    }
+  }
 
   Uint8List pad(Iterable<int> input) {
     int numBlocks = (input.length + blockSize) ~/ blockSize;

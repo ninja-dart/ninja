@@ -71,7 +71,7 @@ class RSAEncryptionEngine {
 
   int _convertOutput(BigInt result, Uint8List out, int offset) {
     final Uint8List output = bigIntToBytes(result);
-    out.setAll(offset + (blockSize - out.length), output);
+    out.setAll(offset + (blockSize - output.length), output);
     return blockSize;
   }
 }
