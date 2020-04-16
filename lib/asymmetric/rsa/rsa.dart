@@ -79,11 +79,6 @@ class RSAPublicKey {
 
   RSAEncryptionEngine get engine => _engine;
 
-  PKCS7Padder _pkcs7padder;
-
-  PKCS7Padder get pkcs7Padder =>
-      _pkcs7padder ??= PKCS7Padder(_engine.blockSize);
-
   Iterable<int> encryptToBytes(/* String | Iterable<int> */ input) {
     Iterable<int> inputBytes;
     if (input is String) {
@@ -104,6 +99,11 @@ class RSAPublicKey {
     return base64Encode(encryptToBytes(input));
   }
 
+  /*
+  PKCS7Padder _pkcs7padder;
+
+  PKCS7Padder get pkcs7Padder =>
+      _pkcs7padder ??= PKCS7Padder(_engine.blockSize);
   Iterable<int> encryptPkcsToBytes(/* String | List<int> */ input) {
     Iterable<int> inputBytes;
     if (input is String) {
@@ -124,6 +124,7 @@ class RSAPublicKey {
   String encryptPkcsToBase64(/* String | List<int> */ input) {
     return base64Encode(encryptPkcsToBytes(input));
   }
+   */
 
   // TODO verify
 

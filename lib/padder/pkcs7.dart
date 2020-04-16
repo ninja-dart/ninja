@@ -1,17 +1,15 @@
 import 'dart:typed_data';
 
-import 'padding.dart';
+import 'padder.dart';
 
-class PKCS7Padder implements Padder {
-  final int blockSize;
+class PKCS7Padder implements BlockPadder {
+  const PKCS7Padder();
 
-  PKCS7Padder(this.blockSize) {
+  Uint8List pad(int blockSize, Iterable<int> input) {
     if(blockSize > 255) {
       throw Exception('PKCS #7 only supports block sizes less than 256');
     }
-  }
 
-  Uint8List pad(Iterable<int> input) {
     int numBlocks = (input.length + blockSize) ~/ blockSize;
     int outSize = numBlocks * blockSize;
 
@@ -25,7 +23,11 @@ class PKCS7Padder implements Padder {
     return ret;
   }
 
-  Iterable<int> unpad(Iterable<int> data) {
+  Iterable<int> unpad(int blockSize, Iterable<int> data) {
+    if(blockSize > 255) {
+      throw Exception('PKCS #7 only supports block sizes less than 256');
+    }
+
     if (data.length % blockSize != 0) {
       throw ArgumentError('Data size must be multiple of $blockSize!');
     }
@@ -41,7 +43,6 @@ class PKCS7Padder implements Padder {
         throw ArgumentError('Invalid PKCS7 padding!');
       }
     }
-
 
     return data.take(data.length - pads);
   }
