@@ -1,4 +1,5 @@
 import 'dart:convert';
+import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
@@ -79,7 +80,10 @@ class RSAPublicKey {
 
   RSAEncryptionEngine get engine => _engine;
 
-  Iterable<int> encryptToBytes(/* String | Iterable<int> */ input) {
+  int get blockSize => engine.blockSize;
+
+  Iterable<int> encryptToBytes(/* String | Iterable<int> */ input,
+      {BlockPadder padder}) {
     Iterable<int> inputBytes;
     if (input is String) {
       inputBytes = utf8.encode(input);
@@ -87,44 +91,35 @@ class RSAPublicKey {
       inputBytes = input;
     } else {
       throw ArgumentError('Should be String or List<int>');
+    }
+    if (padder != null) {
+      inputBytes = padder.pad(blockSize, inputBytes);
     }
     return engine.process(inputBytes);
   }
 
-  String encrypt(/* String | Iterable<int> */ input) {
-    return hexEncoder.convert(encryptToBytes(input));
+  String encrypt(/* String | Iterable<int> */ input, {BlockPadder padder}) {
+    return hexEncoder.convert(encryptToBytes(input, padder: padder));
   }
 
-  String encryptToBase64(/* String | Iterable<int> */ input) {
-    return base64Encode(encryptToBytes(input));
+  String encryptToBase64(/* String | Iterable<int> */ input,
+      {BlockPadder padder}) {
+    return base64Encode(encryptToBytes(input, padder: padder));
   }
 
-  /*
-  PKCS7Padder _pkcs7padder;
-
-  PKCS7Padder get pkcs7Padder =>
-      _pkcs7padder ??= PKCS7Padder(_engine.blockSize);
-  Iterable<int> encryptPkcsToBytes(/* String | List<int> */ input) {
-    Iterable<int> inputBytes;
-    if (input is String) {
-      inputBytes = utf8.encode(input);
-    } else if (input is Iterable<int>) {
-      inputBytes = input;
-    } else {
-      throw ArgumentError('Should be String or List<int>');
-    }
-    final padded = pkcs7Padder.pad(inputBytes);
-    return engine.process(padded);
+  Iterable<int> encryptPkcsToBytes(/* String | Iterable<int> */ input,
+      {Random rand}) {
+    return encryptToBytes(input, padder: EmePkcs1V1dot5Encoder(rand: rand));
   }
 
-  String encryptPkcs(/* String | List<int> */ input) {
-    return hexEncoder.convert(encryptPkcsToBytes(input));
+  String encryptPkcs(/* String | Iterable<int> */ input, {Random rand}) {
+    return encrypt(input, padder: EmePkcs1V1dot5Encoder(rand: rand));
   }
 
-  String encryptPkcsToBase64(/* String | List<int> */ input) {
-    return base64Encode(encryptPkcsToBytes(input));
+  String encryptPkcsToBase64(/* String | Iterable<int> */ input,
+      {Random rand}) {
+    return encryptToBase64(input, padder: EmePkcs1V1dot5Encoder(rand: rand));
   }
-   */
 
   // TODO verify
 
@@ -219,7 +214,10 @@ class RSAPrivateKey {
 
   RSADecryptionEngine get engine => _engine;
 
-  Uint8List decryptToBytes(/* String | List<int> */ input) {
+  int get blockSize => engine.blockSize;
+
+  Iterable<int> decryptToBytes(/* String | List<int> */ input,
+      {BlockPadder padder, bool raw = false}) {
     Uint8List inputBytes;
     if (input is String) {
       inputBytes = hexDecoder.convert(input);
@@ -230,11 +228,25 @@ class RSAPrivateKey {
     } else {
       throw ArgumentError('Should be String or List<int>');
     }
-    return engine.process(inputBytes);
+    Uint8List unpadded = engine.process(inputBytes, dontPadLastBlock: raw);
+    if (padder == null) {
+      return unpadded;
+    }
+    return padder.unpad(blockSize, unpadded);
   }
 
-  String decrypt(/* String | List<int> */ input) {
-    return String.fromCharCodes(decryptToBytes(input));
+  String decrypt(/* String | List<int> */ input,
+      {BlockPadder padder, bool raw = false}) {
+    return String.fromCharCodes(
+        decryptToBytes(input, padder: padder, raw: raw));
+  }
+
+  Iterable<int> decryptPkcsToBytes(/* String | List<int> */ input) {
+    return decryptToBytes(input, padder: EmePkcs1V1dot5Encoder());
+  }
+
+  String decryptPkcs(/* String | List<int> */ input) {
+    return decrypt(input, padder: EmePkcs1V1dot5Encoder());
   }
 
   // TODO sign

@@ -91,7 +91,7 @@ class EmePkcs1V1dot5Encoder implements BlockPadder, IndividualBlockPadder {
   Iterable<int> unpad(int blockSize, Iterable<int> input) {
     if (input.length % blockSize != 0) {
       throw Exception(
-          'Invalid message length. Must be multiple of blockSize $blockSize');
+          'Invalid message length. Must be multiple of blockSize $blockSize. Got ${input.length}');
     }
 
     final numBlocks = input.length ~/ blockSize;

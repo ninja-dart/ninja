@@ -1,5 +1,4 @@
 import 'dart:convert';
-
 import 'dart:typed_data';
 
 import 'package:ninja/asymmetric/rsa/rsa.dart';
@@ -16,7 +15,8 @@ class RSADecryptionEngine {
   final int bitSize;
 
   RSADecryptionEngine(this._key)
-      : bitSize = _key.n.bitLength, blockSize = (_key.n.bitLength + 7) >> 3 {
+      : bitSize = _key.n.bitLength,
+        blockSize = (_key.n.bitLength + 7) >> 3 {
     BigInt pSub1 = (_key.p - BigInt.one);
     BigInt qSub1 = (_key.q - BigInt.one);
     _dP = _key.d.remainder(pSub1);
@@ -24,7 +24,7 @@ class RSADecryptionEngine {
     _qInv = _key.q.modInverse(_key.p);
   }
 
-  Uint8List process(Iterable<int> data) {
+  Iterable<int> process(Iterable<int> data, {bool dontPadLastBlock = false}) {
     final numBlocks = (data.length / blockSize).ceil();
     final out = Uint8List(numBlocks * blockSize);
     int outOffset = 0;
@@ -35,18 +35,29 @@ class RSADecryptionEngine {
       } else {
         curInputBlock = data.take(blockSize);
       }
-      int outBlockLen = processBlock(curInputBlock, out, outOffset);
-      outOffset += outBlockLen;
+      if (dontPadLastBlock && i == numBlocks - 1) {
+        int outBlockLen = processBlock(curInputBlock, out, outOffset,
+            dontPad: dontPadLastBlock);
+        outOffset += outBlockLen;
+      } else {
+        processBlock(curInputBlock, out, outOffset);
+        outOffset += blockSize;
+      }
       data = data.skip(blockSize);
+    }
+
+    if (!dontPadLastBlock || outOffset == out.length) {
+      return out;
     }
 
     return out.sublist(0, outOffset);
   }
 
-  int processBlock(Iterable<int> inputBlock, Uint8List out, int outOff) {
+  int processBlock(Iterable<int> inputBlock, Uint8List out, int outOff,
+      {bool dontPad = false}) {
     BigInt input = _convertInput(inputBlock);
     BigInt output = _processBigInteger(input);
-    return _convertOutput(output, out, outOff);
+    return _convertOutput(output, out, outOff, dontPad: dontPad);
   }
 
   List<int> signBlock(final /* BigInt | Iterable<int> | String */ message) {
@@ -75,10 +86,15 @@ class RSADecryptionEngine {
     return res;
   }
 
-  int _convertOutput(BigInt result, Uint8List out, int outOff) {
+  int _convertOutput(BigInt result, Uint8List out, int outOff,
+      {bool dontPad = false}) {
     final Uint8List output = bigIntToBytes(result);
-    out.setAll(outOff, output);
-    return output.length;
+    if (dontPad || output.length == blockSize) {
+      out.setAll(outOff, output);
+      return output.length;
+    }
+    out.setAll(outOff + (blockSize - output.length), output);
+    return blockSize;
   }
 
   BigInt _processBigInteger(BigInt input) {
