@@ -15,10 +15,16 @@ void main() {
       String decrypted = privateKey.decryptPkcs(encrypted);
 
       expect(decrypted, message);
-  });
-
+    });
+    
+    test('small_msg_encrypt', () {
+      final decoded = privateKey.decryptPkcs('253D6BCFBE654D5B07179719ECB250218AFEBCF555FD6CC56C3C64838BE719B44484C7916106B81C722AF245886172A5233B44234B36E61186CA77E513404514');
+      expect(decoded, 'hello world!');
+    });
+    
     test('long_msg', () {
-      final message = 'Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...';
+      final message =
+          'Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...';
       String encrypted = publicKey.encryptPkcs(message);
       print(publicKey.encryptPkcsToBase64(message));
       // expect(encrypted, '518afcda46f9049de79be8b526313769dea78bc273ec21801b470435aad76ae9b66bf0a77e8b9e8d2e076b2717caca2e622d54d6fab274d14f7770f9f2b257af9de7466c969a8767ee7e83ec4b45a3ed13e2cba66dfca25391c487104fd288b4fbda34c3c740169d4c14a09c7c80f63653c3df3cadddf2cf7f2c57259c5a2a54b612e3ee2bfb79876a1d302e82545dc573f076a0828e610cd77c03bce50830966c687397305df6d04dcb487fd3f9eadbf865574658843edad2ff5d3ae398a3070c15c8985cec882750668b92eada47c6ac3920c87cd96708e4238acc31410b9ab9342f5980b6d05cd9dd7b8819165b3adee1a938b942e85833e292bdd98677be0bb6729fac2fc3c3c38ae48d61745fffd3d147120a225afab3df2d89c42a3dd37d57b25959290159c07d836cff7c28bf4d777ba4a3851ea9b98cd37fbbf9837b');
