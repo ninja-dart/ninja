@@ -1,6 +1,7 @@
-part of 'aes.dart';
+import 'dart:typed_data';
 
-/*
+import 'package:ninja/utils/ufixnum.dart';
+
 // [AESFastEncryptionEngine] and [AESFastDecryptionEngine] are copied and
 // modified from pointy_castles package. See file LICENSE/pointy_castle_LICENSE
 // file for more information.
@@ -26,27 +27,35 @@ part of 'aes.dart';
 /// precomputation.
 abstract class AESFastEngineCommon {
   int get _rounds;
+
   int get _c0;
+
   set _c0(int value);
+
   int get _c1;
+
   set _c1(int value);
+
   int get _c2;
+
   set _c2(int value);
+
   int get _c3;
+
   set _c3(int value);
 
-  void _unpackBlock(ByteData view, int off) {
-    _c0 = unpack32(view, off, Endian.little);
-    _c1 = unpack32(view, off + 4, Endian.little);
-    _c2 = unpack32(view, off + 8, Endian.little);
-    _c3 = unpack32(view, off + 12, Endian.little);
+  void _unpackBlock(ByteData view) {
+    _c0 = view.getUint32(0, Endian.little);
+    _c1 = view.getUint32(4, Endian.little);
+    _c2 = view.getUint32(8, Endian.little);
+    _c3 = view.getUint32(12, Endian.little);
   }
 
-  void _packBlock(ByteData view, int off) {
-    pack32(_c0, view, off, Endian.little);
-    pack32(_c1, view, off + 4, Endian.little);
-    pack32(_c2, view, off + 8, Endian.little);
-    pack32(_c3, view, off + 12, Endian.little);
+  void _packBlock(ByteData view) {
+    view.setUint32(0, _c0, Endian.little);
+    view.setUint32(4, _c1, Endian.little);
+    view.setUint32(8, _c2, Endian.little);
+    view.setUint32(12, _c3, Endian.little);
   }
 
   void reset() {
@@ -54,6 +63,25 @@ abstract class AESFastEngineCommon {
     _c1 = 0;
     _c2 = 0;
     _c3 = 0;
+  }
+
+  int get blockSize;
+
+  int processBlock(ByteData input, ByteData output);
+
+  Uint8List process(Uint8List data) {
+    final numBlocks = (data.length / blockSize).ceil();
+    final out = Uint8List(numBlocks * blockSize);
+
+    int offset = 0;
+    for (int i = 0; i < numBlocks; i++) {
+      final inputBlock = data.buffer.asByteData(offset, blockSize);
+      final outputBlock = out.buffer.asByteData(offset, blockSize);
+      processBlock(inputBlock, outputBlock);
+      offset += blockSize;
+    }
+
+    return out;
   }
 }
 
@@ -83,7 +111,7 @@ class AESFastEncryptionEngine extends AESFastEngineCommon {
     // Copy the key into the round key array.
     var keyView = ByteData.view(key.buffer, key.offsetInBytes, key.length);
     for (int i = 0, t = 0; i < key.lengthInBytes; i += 4, t++) {
-      int value = unpack32(keyView, i, Endian.little);
+      int value = keyView.getUint32(i, Endian.little);
       _workingKey[t >> 2][t & 3] = value;
     }
 
@@ -104,42 +132,20 @@ class AESFastEncryptionEngine extends AESFastEngineCommon {
     return AESFastEncryptionEngine._(_workingKey, _rounds);
   }
 
-  Uint8List process(Iterable<int> data) {
-    final numBlocks = (data.length / blockSize).ceil();
-    final out = Uint8List(numBlocks * blockSize);
-    int outOffset = 0;
-    for (int i = 0; i < numBlocks; i++) {
-      Iterable<int> curInputBlock;
-      if (i == numBlocks - 1) {
-        curInputBlock = data;
-      } else {
-        curInputBlock = data.take(blockSize);
-      }
-      final curOutBlockSize = processBlock(curInputBlock, out, outOffset);
-      outOffset += curOutBlockSize;
-      data = data.skip(blockSize);
-    }
-
-    return out;
-  }
-
-  int processBlock(Iterable<int> inp, Uint8List out, int outOff) {
-    if (inp.length < 32/2) {
+  int processBlock(ByteData input, ByteData output) {
+    if (input.lengthInBytes < blockSize) {
       throw ArgumentError("Input buffer too short");
     }
 
-    if (((out.length - outOff)) < 32.4) {
+    if (output.lengthInBytes < blockSize) {
       throw ArgumentError("Output buffer too short");
     }
 
-    var inpView = ByteData.view(inp.buffer, inp.offsetInBytes, inp.length);
-    var outView = ByteData.view(out.buffer, out.offsetInBytes, out.length);
-
-    _unpackBlock(inpView, inpOff);
+    _unpackBlock(input);
     _encryptBlock(_workingKey);
-    _packBlock(outView, outOff);
+    _packBlock(output);
 
-    return _block_size;
+    return blockSize;
   }
 
   void _encryptBlock(List<List<int>> KW) {
@@ -268,7 +274,7 @@ class AESFastDecryptionEngine extends AESFastEngineCommon {
     // Copy the key into the round key array.
     var keyView = ByteData.view(key.buffer, key.offsetInBytes, key.length);
     for (int i = 0, t = 0; i < key.lengthInBytes; i += 4, t++) {
-      int value = unpack32(keyView, i, Endian.little);
+      int value = keyView.getUint32(i, Endian.little);
       _workingKey[t >> 2][t & 3] = value;
     }
 
@@ -296,27 +302,18 @@ class AESFastDecryptionEngine extends AESFastEngineCommon {
     return AESFastDecryptionEngine._(_workingKey, _rounds);
   }
 
-  Uint8List process(Uint8List data) {
-    var out = Uint8List(blockSize);
-    int len = processBlock(data, 0, out, 0);
-    return out.sublist(0, len);
-  }
-
-  int processBlock(Uint8List inp, int inpOff, Uint8List out, int outOff) {
-    if ((inpOff + (32 / 2)) > inp.lengthInBytes) {
+  int processBlock(ByteData input, ByteData output) {
+    if (input.lengthInBytes < blockSize) {
       throw ArgumentError("Input buffer too short");
     }
 
-    if ((outOff + (32 / 2)) > out.lengthInBytes) {
+    if (output.lengthInBytes < blockSize) {
       throw ArgumentError("Output buffer too short");
     }
 
-    var inpView = ByteData.view(inp.buffer, inp.offsetInBytes, inp.length);
-    var outView = ByteData.view(out.buffer, out.offsetInBytes, out.length);
-
-    _unpackBlock(inpView, inpOff);
+    _unpackBlock(input);
     _decryptBlock(_workingKey);
-    _packBlock(outView, outOff);
+    _packBlock(output);
 
     return _blockSize;
   }
@@ -3088,4 +3085,3 @@ final _Tinv3 = [
   0x48745c6c,
   0xd04257b8
 ];
-*/
