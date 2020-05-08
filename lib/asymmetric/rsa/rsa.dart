@@ -109,16 +109,16 @@ class RSAPublicKey {
 
   Iterable<int> encryptPkcsToBytes(/* String | Iterable<int> */ input,
       {Random rand}) {
-    return encryptToBytes(input, padder: EmePkcs1V1dot5Encoder(rand: rand));
+    return encryptToBytes(input, padder: EmePkcs1V15Encoder(rand: rand));
   }
 
   String encryptPkcs(/* String | Iterable<int> */ input, {Random rand}) {
-    return encrypt(input, padder: EmePkcs1V1dot5Encoder(rand: rand));
+    return encrypt(input, padder: EmePkcs1V15Encoder(rand: rand));
   }
 
   String encryptPkcsToBase64(/* String | Iterable<int> */ input,
       {Random rand}) {
-    return encryptToBase64(input, padder: EmePkcs1V1dot5Encoder(rand: rand));
+    return encryptToBase64(input, padder: EmePkcs1V15Encoder(rand: rand));
   }
 
   // TODO verify
@@ -242,11 +242,11 @@ class RSAPrivateKey {
   }
 
   Iterable<int> decryptPkcsToBytes(/* String | List<int> */ input) {
-    return decryptToBytes(input, padder: EmePkcs1V1dot5Encoder());
+    return decryptToBytes(input, padder: EmePkcs1V15Encoder());
   }
 
   String decryptPkcs(/* String | List<int> */ input) {
-    return decrypt(input, padder: EmePkcs1V1dot5Encoder());
+    return decrypt(input, padder: EmePkcs1V15Encoder());
   }
 
   // TODO sign

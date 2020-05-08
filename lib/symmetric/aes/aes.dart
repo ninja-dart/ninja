@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 import 'package:ninja/utils/hex_string.dart';
 import 'package:ninja/ninja.dart';
@@ -11,12 +12,14 @@ class AESKey {
 
   AESKey(this.keyBytes, {this.padder = const PKCS7Padder()});
 
-  factory AESKey.fromString(String key, {BlockPadder padder = const PKCS7Padder()}) => AESKey(Uint8List.fromList(key.codeUnits), padder: padder);
+  factory AESKey.fromString(String key,
+          {BlockPadder padder = const PKCS7Padder()}) =>
+      AESKey(Uint8List.fromList(utf8.encode(key)), padder: padder);
 
   String encrypt(String input) {
     final engine = AESFastEncryptionEngine(keyBytes);
 
-    final inputBytes = Uint8List.fromList(input.codeUnits);
+    final inputBytes = utf8.encode(input);
     final padded = padder.pad(engine.blockSize, inputBytes);
 
     final encryptedBytes = engine.process(padded);
@@ -31,6 +34,6 @@ class AESKey {
 
     final output = engine.process(inputBytes);
 
-    return String.fromCharCodes(padder.unpad(engine.blockSize, output));
+    return utf8.decode(padder.unpad(engine.blockSize, output));
   }
 }

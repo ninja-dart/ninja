@@ -5,6 +5,7 @@ import 'dart:typed_data';
 // LICENSE/pointy_castle_LICENSE file for more information.
 
 /// Decode a BigInt from bytes in big-endian encoding.
+/// This is OS2IP as defined in rfc3447.
 BigInt bytesToBigInt(Iterable<int> bytes) {
   BigInt result = BigInt.from(0);
 
@@ -17,6 +18,7 @@ BigInt bytesToBigInt(Iterable<int> bytes) {
 }
 
 /// Encode a BigInt into bytes using big-endian encoding.
+/// This is I2OSP as defined in rfc3447.
 Uint8List bigIntToBytes(BigInt number, {int outLen}) {
   int size = (number.bitLength + 7) >> 3;
   if(outLen == null) {

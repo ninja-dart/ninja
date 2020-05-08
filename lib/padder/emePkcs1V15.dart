@@ -3,10 +3,10 @@ import 'dart:typed_data';
 
 import 'padder.dart';
 
-class EmePkcs1V1dot5Encoder implements BlockPadder, IndividualBlockPadder {
+class EmePkcs1V15Encoder implements BlockPadder, IndividualBlockPadder {
   final Random rand;
 
-  EmePkcs1V1dot5Encoder({Random rand}) : rand = rand ?? Random.secure();
+  EmePkcs1V15Encoder({Random rand}) : rand = rand ?? Random.secure();
 
   /// Pads a single block
   void padBlock(int blockSize, Iterable<int> block, ByteData output) {

@@ -1,12 +1,12 @@
 import 'dart:convert';
 
 import 'package:ninja/ninja.dart';
-import 'package:ninja/padder/emePkcs1V1dot5.dart';
+import 'package:ninja/padder/emePkcs1V15.dart';
 import 'package:test/test.dart';
 
 void main() {
   group('EME-PKCS1-V1_5', () {
-    final padder = EmePkcs1V1dot5Encoder();
+    final padder = EmePkcs1V15Encoder();
 
     test('shortmsg', () {
       final message = utf8.encode('hello world!');

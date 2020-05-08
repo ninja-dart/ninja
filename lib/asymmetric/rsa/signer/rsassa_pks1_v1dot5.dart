@@ -33,8 +33,10 @@ class RsassaPkcs1V1dot5Signer implements Signer {
 
   List<int> signToBytes(final /* String | List<int> | BigInt */ msg) {
     List<int> msgBytes;
-    if (msg is String) {
-      msgBytes = msg.codeUnits;
+    if(msg is List<int>) {
+      msgBytes = msg;
+    } else if (msg is String) {
+      msgBytes = utf8.encode(msg);
     } else if (msg is BigInt) {
       msgBytes = bigIntToBytes(msg);
     }
