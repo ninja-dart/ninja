@@ -1,6 +1,6 @@
 import 'dart:convert';
 
-import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V1dot5.dart';
+import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
 import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
 import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
 import 'package:ninja/asymmetric/rsa/rsa.dart';
@@ -20,20 +20,20 @@ abstract class Verifier {
       /* String | List<int> | BigInt */ msg);
 }
 
-class RsassaPkcs1V1dot5Signer implements Signer {
+class RsassaPkcs1V15Signer implements Signer {
   final RSAPrivateKey key;
 
   final EmsaHasher hasher;
 
   final RSADecryptionEngine engine;
 
-  RsassaPkcs1V1dot5Signer(this.key, {EmsaHasher hasher})
+  RsassaPkcs1V15Signer(this.key, {EmsaHasher hasher})
       : hasher = hasher ?? EmsaHasher.sha256,
         engine = RSADecryptionEngine(key);
 
   List<int> signToBytes(final /* String | List<int> | BigInt */ msg) {
     List<int> msgBytes;
-    if(msg is List<int>) {
+    if (msg is List<int>) {
       msgBytes = msg;
     } else if (msg is String) {
       msgBytes = utf8.encode(msg);
@@ -42,7 +42,7 @@ class RsassaPkcs1V1dot5Signer implements Signer {
     }
 
     final encodedMessage =
-        emsaPkcs1V1dot5Encode(msgBytes, engine.blockSize, hasher);
+        emsaPkcs1V15Encode(msgBytes, engine.blockSize, hasher);
 
     return engine.signBlock(encodedMessage);
   }
@@ -53,14 +53,14 @@ class RsassaPkcs1V1dot5Signer implements Signer {
   }
 }
 
-class RsassaPkcs1V1dot5Verifier implements Verifier {
+class RsassaPkcs1V15Verifier implements Verifier {
   final RSAPublicKey key;
 
   final EmsaHasher hasher;
 
   final RSAEncryptionEngine engine;
 
-  RsassaPkcs1V1dot5Verifier(this.key, {EmsaHasher hasher})
+  RsassaPkcs1V15Verifier(this.key, {EmsaHasher hasher})
       : hasher = hasher ?? EmsaHasher.sha256,
         engine = RSAEncryptionEngine(key);
 
@@ -79,7 +79,7 @@ class RsassaPkcs1V1dot5Verifier implements Verifier {
       throw Exception('Unknown type');
     }
     final encodedMessage =
-        emsaPkcs1V1dot5Encode(msgBytes, engine.blockSize, hasher);
+        emsaPkcs1V15Encode(msgBytes, engine.blockSize, hasher);
 
     return iterableEquality.equals(emDash, encodedMessage);
   }

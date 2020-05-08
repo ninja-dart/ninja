@@ -16,7 +16,8 @@ class RSAEncryptionEngine {
   final int bitSize;
 
   RSAEncryptionEngine(this.key)
-      : bitSize = key.n.bitLength, blockSize = (key.n.bitLength + 7) ~/ 8;
+      : bitSize = key.n.bitLength,
+        blockSize = (key.n.bitLength + 7) ~/ 8;
 
   Iterable<int> process(Iterable<int> data) {
     final numBlocks = (data.length / blockSize).ceil();

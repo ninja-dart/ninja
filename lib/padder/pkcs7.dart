@@ -6,7 +6,7 @@ class PKCS7Padder implements BlockPadder {
   const PKCS7Padder();
 
   Uint8List pad(int blockSize, Iterable<int> input) {
-    if(blockSize > 255) {
+    if (blockSize > 255) {
       throw Exception('PKCS #7 only supports block sizes less than 256');
     }
 
@@ -24,7 +24,7 @@ class PKCS7Padder implements BlockPadder {
   }
 
   Iterable<int> unpad(int blockSize, Iterable<int> data) {
-    if(blockSize > 255) {
+    if (blockSize > 255) {
       throw Exception('PKCS #7 only supports block sizes less than 256');
     }
 
@@ -47,5 +47,3 @@ class PKCS7Padder implements BlockPadder {
     return data.take(data.length - pads);
   }
 }
-
-

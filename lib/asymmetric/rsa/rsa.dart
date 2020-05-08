@@ -3,8 +3,10 @@ import 'dart:math';
 import 'dart:typed_data';
 
 import 'package:asn1lib/asn1lib.dart';
+import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
 import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
 import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
+import 'package:ninja/asymmetric/rsa/signer/rsassa_pks1_v15.dart';
 import 'package:ninja/ninja.dart';
 import 'package:ninja/utils/big_int.dart';
 import 'package:ninja/utils/hex_string.dart';
@@ -122,21 +124,28 @@ class RSAPublicKey {
   }
 
   Iterable<int> encryptOaepToBytes(
-      /* String | Iterable<int> */ input, OAEPPadder oaepPadder) {
+      /* String | Iterable<int> */ input,
+      OAEPPadder oaepPadder) {
     return encryptToBytes(input, padder: oaepPadder);
   }
 
   String encryptOaep(
-      /* String | Iterable<int> */ input, OAEPPadder oaepPadder) {
+      /* String | Iterable<int> */ input,
+      OAEPPadder oaepPadder) {
     return encrypt(input, padder: oaepPadder);
   }
 
   String encryptOaepToBase64(
-      /* String | Iterable<int> */ input, OAEPPadder oaepPadder) {
+      /* String | Iterable<int> */ input,
+      OAEPPadder oaepPadder) {
     return encryptToBase64(input, padder: oaepPadder);
   }
 
-  // TODO verify
+  bool verifySsaPkcs1V15(/* String | List<int> | BigInt */ signature,
+      final /* String | List<int> | BigInt */ msg,
+      {EmsaHasher hasher}) {
+    return RsassaPkcs1V15Verifier(this, hasher: hasher).verify(signature, msg);
+  }
 
   String toString() => 'RSAPublicKey(n: $n, e: $e)';
 }
@@ -252,8 +261,7 @@ class RSAPrivateKey {
 
   String decrypt(/* String | List<int> */ input,
       {BlockPadder padder, bool raw = false}) {
-    return utf8.decode(
-        decryptToBytes(input, padder: padder, raw: raw));
+    return utf8.decode(decryptToBytes(input, padder: padder, raw: raw));
   }
 
   Iterable<int> decryptPkcsToBytes(/* String | List<int> */ input) {
@@ -264,7 +272,9 @@ class RSAPrivateKey {
     return decrypt(input, padder: EmePkcs1V15Encoder());
   }
 
-  Iterable<int> decryptOaepToBytes(/* String | List<int> */ input, OAEPPadder oaepPadder) {
+  Iterable<int> decryptOaepToBytes(
+      /* String | List<int> */ input,
+      OAEPPadder oaepPadder) {
     return decryptToBytes(input, padder: oaepPadder);
   }
 
@@ -272,7 +282,15 @@ class RSAPrivateKey {
     return decrypt(input, padder: oaepPadder);
   }
 
-  // TODO sign
+  List<int> signSsaPkcs1V15ToBytes(final /* String | List<int> | BigInt */ msg,
+      {EmsaHasher hasher}) {
+    return RsassaPkcs1V15Signer(this, hasher: hasher).signToBytes(msg);
+  }
+
+  String signSsaPkcs1V15(/* String | List<int> | BigInt */ msg,
+      {EmsaHasher hasher}) {
+    return RsassaPkcs1V15Signer(this, hasher: hasher).sign(msg);
+  }
 
   RSAPublicKey get toPublicKey => RSAPublicKey(n, e);
 

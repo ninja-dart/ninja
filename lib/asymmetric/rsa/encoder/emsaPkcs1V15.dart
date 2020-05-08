@@ -40,8 +40,7 @@ class EmsaHasher {
 }
 
 /// Implements https://tools.ietf.org/html/rfc3447#section-9.2 specification.
-List<int> emsaPkcs1V1dot5Encode(
-    List<int> msg, int outLength, EmsaHasher hasher) {
+List<int> emsaPkcs1V15Encode(List<int> msg, int outLength, EmsaHasher hasher) {
   final hashed = hasher.hash(msg);
 
   final asn1 = ASN1Sequence()

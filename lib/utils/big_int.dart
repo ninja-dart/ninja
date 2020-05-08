@@ -9,7 +9,7 @@ import 'dart:typed_data';
 BigInt bytesToBigInt(Iterable<int> bytes) {
   BigInt result = BigInt.from(0);
 
-  for(int byte in bytes) {
+  for (int byte in bytes) {
     result = result << 8;
     result |= BigInt.from(byte);
   }
@@ -21,9 +21,9 @@ BigInt bytesToBigInt(Iterable<int> bytes) {
 /// This is I2OSP as defined in rfc3447.
 Uint8List bigIntToBytes(BigInt number, {int outLen}) {
   int size = (number.bitLength + 7) >> 3;
-  if(outLen == null) {
+  if (outLen == null) {
     outLen = size;
-  } else if(outLen < size) {
+  } else if (outLen < size) {
     throw Exception('Number too large');
   }
   final result = Uint8List(outLen);

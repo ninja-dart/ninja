@@ -16,12 +16,13 @@ void main() {
 
       expect(decrypted, message);
     });
-    
+
     test('small_msg_encrypt', () {
-      final decoded = privateKey.decryptPkcs('253D6BCFBE654D5B07179719ECB250218AFEBCF555FD6CC56C3C64838BE719B44484C7916106B81C722AF245886172A5233B44234B36E61186CA77E513404514');
+      final decoded = privateKey.decryptPkcs(
+          '253D6BCFBE654D5B07179719ECB250218AFEBCF555FD6CC56C3C64838BE719B44484C7916106B81C722AF245886172A5233B44234B36E61186CA77E513404514');
       expect(decoded, 'hello world!');
     });
-    
+
     test('long_msg', () {
       final message =
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...';
