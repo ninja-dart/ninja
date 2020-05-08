@@ -1,12 +1,12 @@
 import 'dart:convert';
 
-import 'package:collection/collection.dart';
 import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V1dot5.dart';
 import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
 import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
 import 'package:ninja/asymmetric/rsa/rsa.dart';
 import 'package:ninja/ninja.dart';
 import 'package:ninja/utils/big_int.dart';
+import 'package:ninja/utils/iterable.dart';
 
 abstract class Signer {
   List<int> signToBytes(/* String | List<int> | BigInt */ msg);
@@ -81,8 +81,6 @@ class RsassaPkcs1V1dot5Verifier implements Verifier {
     final encodedMessage =
         emsaPkcs1V1dot5Encode(msgBytes, engine.blockSize, hasher);
 
-    return _intIterableEquality.equals(emDash, encodedMessage);
+    return iterableEquality.equals(emDash, encodedMessage);
   }
-
-  static const _intIterableEquality = IterableEquality<int>();
 }

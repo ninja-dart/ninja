@@ -5,6 +5,7 @@ import 'dart:typed_data';
 import 'package:crypto/crypto.dart' as crypto;
 import 'package:ninja/padder/mgf/mgf.dart';
 import 'package:ninja/padder/padder.dart';
+import 'package:ninja/utils/iterable.dart';
 
 class OAEPPadder implements BlockPadder, IndividualBlockPadder {
   final crypto.Hash hasher;
@@ -18,7 +19,13 @@ class OAEPPadder implements BlockPadder, IndividualBlockPadder {
         mgf = mgf ?? mgf1Sha1;
 
   void padBlock(int blockSize, Iterable<int> block, ByteData output,
-      {List<int> labelHash}) {
+      {List<int> labelHash, /* String | List<int> */ label}) {
+    if (labelHash == null) {
+      if (label == null) label = <int>[];
+
+      labelHash = hasher.convert(label).bytes;
+    }
+
     final ps = List<int>.generate(
         blockSize - block.length - (2 * labelHash.length) - 2, (_) => 0);
     final db = <int>[...labelHash, ...ps, 0x01, ...block];
@@ -69,13 +76,79 @@ class OAEPPadder implements BlockPadder, IndividualBlockPadder {
     return output;
   }
 
-  Iterable<int> unpadBlock(int blockSize, Iterable<int> block) {
-    // TODO
-    throw UnimplementedError();
+  Iterable<int> unpadBlock(int blockSize, Iterable<int> block,
+      {List<int> labelHash, /* String | List<int> */ label}) {
+    if (block.length != blockSize) {
+      throw Exception('Invalid blocksize');
+    }
+
+    if (block.elementAt(0) != 0) {
+      throw Exception('Invalid block. First byte not 0');
+    }
+
+    if (labelHash == null) {
+      if (label == null) label = <int>[];
+
+      labelHash = hasher.convert(label).bytes;
+    }
+
+    final maskedSeed = block.skip(1).take(labelHash.length).toList();
+    final maskedDb = block.skip(1 + labelHash.length).toList();
+
+    final seedMask = mgf.encode(labelHash.length, maskedDb);
+    final seed = List<int>.generate(
+        labelHash.length, (i) => seedMask[i] ^ maskedSeed[i]);
+
+    final dbMask = mgf.encode(blockSize - labelHash.length - 1, seed);
+    var db = List<int>.generate(
+        blockSize - labelHash.length - 1, (i) => dbMask[i] ^ maskedDb[i]);
+
+    final labelHashDash = db.take(labelHash.length);
+    if (!iterableEquality.equals(labelHash, labelHashDash)) {
+      throw Exception('Invalid block. Label hashes do not match');
+    }
+    db = db.skip(labelHash.length);
+
+    final oneIndex = db.firstWhere((v) => v == 0x01, orElse: () => null);
+    if (oneIndex == null) {
+      throw Exception('Invalid block. Cannot find message delimiter');
+    }
+    if (db.take(oneIndex).any((v) => v != 0)) {
+      throw Exception('Invalid block. Found non-zero element in PS');
+    }
+
+    return db.skip(oneIndex + 1);
   }
 
-  Iterable<int> unpad(int blockSize, Iterable<int> input) {
-    // TODO
-    throw UnimplementedError();
+  Iterable<int> unpad(int blockSize, Iterable<int> input,
+      {/* String | List<int> */ label = const <int>[]}) {
+    if (label is! List<int>) {
+      label = utf8.encode(label);
+    }
+    final labelHash = hasher.convert(label).bytes;
+    if (input.length % blockSize != 0) {
+      throw Exception(
+          'Invalid message length. Must be multiple of blockSize $blockSize. Got ${input.length}');
+    }
+
+    int messageBlockSize = blockSize - (2 * labelHash.length) - 2;
+    final numBlocks = input.length ~/ blockSize;
+
+    final out = Uint8List(numBlocks * messageBlockSize);
+    int outLen = 0;
+
+    for (int i = 0; i < numBlocks; i++) {
+      Iterable<int> block = input.take(blockSize);
+      input = input.skip(blockSize);
+      final unpaddedMsg = unpadBlock(blockSize, block, labelHash: labelHash);
+      out.setAll(i * messageBlockSize, unpaddedMsg);
+      outLen += unpaddedMsg.length;
+    }
+
+    if (outLen == out.length) {
+      return out;
+    }
+
+    return out.take(outLen);
   }
 }
