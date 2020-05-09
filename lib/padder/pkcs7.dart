@@ -2,7 +2,7 @@ import 'dart:typed_data';
 
 import 'padder.dart';
 
-class PKCS7Padder implements BlockPadder {
+class PKCS7Padder implements Padder {
   const PKCS7Padder();
 
   Uint8List pad(int blockSize, Iterable<int> input) {

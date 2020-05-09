@@ -85,7 +85,7 @@ class RSAPublicKey {
   int get blockSize => engine.blockSize;
 
   Iterable<int> encryptToBytes(/* String | Iterable<int> */ input,
-      {BlockPadder padder}) {
+      {Padder padder}) {
     Iterable<int> inputBytes;
     if (input is String) {
       inputBytes = utf8.encode(input);
@@ -100,12 +100,12 @@ class RSAPublicKey {
     return engine.process(inputBytes);
   }
 
-  String encrypt(/* String | Iterable<int> */ input, {BlockPadder padder}) {
+  String encrypt(/* String | Iterable<int> */ input, {Padder padder}) {
     return hexEncoder.convert(encryptToBytes(input, padder: padder));
   }
 
   String encryptToBase64(/* String | Iterable<int> */ input,
-      {BlockPadder padder}) {
+      {Padder padder}) {
     return base64Encode(encryptToBytes(input, padder: padder));
   }
 
@@ -241,7 +241,7 @@ class RSAPrivateKey {
   int get blockSize => engine.blockSize;
 
   Iterable<int> decryptToBytes(/* String | List<int> */ input,
-      {BlockPadder padder, bool raw = false}) {
+      {Padder padder, bool raw = false}) {
     Uint8List inputBytes;
     if (input is String) {
       inputBytes = hexDecoder.convert(input);
@@ -260,7 +260,7 @@ class RSAPrivateKey {
   }
 
   String decrypt(/* String | List<int> */ input,
-      {BlockPadder padder, bool raw = false}) {
+      {Padder padder, bool raw = false}) {
     return utf8.decode(decryptToBytes(input, padder: padder, raw: raw));
   }
 

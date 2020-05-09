@@ -1,5 +1,6 @@
 import 'dart:typed_data';
 
+import 'package:ninja/block_cipher/block_cipher.dart';
 import 'package:ninja/utils/ufixnum.dart';
 
 // [AESFastEncryptionEngine] and [AESFastDecryptionEngine] are copied and
@@ -25,9 +26,7 @@ import 'package:ninja/utils/ufixnum.dart';
 /// each round.
 /// This file contains the fast version with 8Kbytes of static tables for round
 /// precomputation.
-abstract class AESFastEngineCommon {
-  int get _rounds;
-
+abstract class _Common {
   int get _c0;
 
   set _c0(int value);
@@ -85,7 +84,7 @@ abstract class AESFastEngineCommon {
   }
 }
 
-class AESFastEncryptionEngine extends AESFastEngineCommon {
+class AESFastEncryptionEngine extends _Common implements BlockCipher {
   static const _block_size = 16;
 
   List<List<int>> _workingKey;
@@ -248,7 +247,7 @@ class AESFastEncryptionEngine extends AESFastEngineCommon {
   }
 }
 
-class AESFastDecryptionEngine extends AESFastEngineCommon {
+class AESFastDecryptionEngine extends _Common implements BlockCipher {
   static const _blockSize = 16;
 
   final List<List<int>> _workingKey;

@@ -1,49 +1,44 @@
-import 'dart:typed_data';
 import 'package:ninja/ninja.dart';
 import 'package:test/test.dart';
 
-/*
-"Lorem ipsum dolor sit amet, consectetur adipiscing elit ........",
-"75020e0812adb36f32b1503e0de7a59691e0db8fd1c9efb920695a626cb633d6db0112c007d19d5ea66fe7ab36c766232b3bcb98fd35f06d27d5a2d475d92728",
-
-"En un lugar de La Mancha, de cuyo nombre no quiero acordarme ...",
-"29523a5e73c0ffb7f9aaabc737a09e73219bad5e98768b71e2c985b2d8ce217730b0720e1a215f7843c8c7e07d44c91212fb1d5b90a791dd147f3746cbc0e28b",
-*/
-
 void main() {
-  group('AES', () {
-    final aesKey1 = AESKey(Uint8List.fromList([
-      0x00,
-      0x11,
-      0x22,
-      0x33,
-      0x44,
-      0x55,
-      0x66,
-      0x77,
-      0x88,
-      0x99,
-      0xAA,
-      0xBB,
-      0xCC,
-      0xDD,
-      0xEE,
-      0xFF
-    ]));
+  group('AES-128-ECB', () {
+    final aesKey1 = AESKey.fromHex('B025700C28E7F0F97F7EA8EEEEC29F9F');
 
-    test('Encoding', () {
-      String value = aesKey1.encrypt(
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit ........');
+    group('short_padded', () {
+      test('Encoding', () {
+        String value = aesKey1.encryptToBase64('hello world!\n');
+        expect(value, 'Sesg9NhOm+eKFe9hU/mfSA==');
+      });
 
-      expect(value,
-          '75020e0812adb36f32b1503e0de7a59691e0db8fd1c9efb920695a626cb633d6db0112c007d19d5ea66fe7ab36c766232b3bcb98fd35f06d27d5a2d475d9272800657ea140655a44782747705d422fad');
+      test('Decode', () {
+        final decoded = aesKey1.decryptToUtf8('Sesg9NhOm+eKFe9hU/mfSA==');
+        expect(decoded, 'hello world!\n');
+      });
     });
 
-    test('Decode', () {
-      String value = aesKey1.decrypt(
-          '75020e0812adb36f32b1503e0de7a59691e0db8fd1c9efb920695a626cb633d6db0112c007d19d5ea66fe7ab36c766232b3bcb98fd35f06d27d5a2d475d9272800657ea140655a44782747705d422fad');
-      expect(value,
-          'Lorem ipsum dolor sit amet, consectetur adipiscing elit ........');
+    group('short', () {
+      test('Encoding', () {
+        String value = aesKey1.encryptToBase64('hello world!!!!\n');
+        expect(value, 'PGxrnKUS/zhDneaO3c0APkKdSMS47iRQ8KLISthNtNU=');
+      });
+
+      test('Decode', () {
+        final decoded = aesKey1.decryptToUtf8('PGxrnKUS/zhDneaO3c0APkKdSMS47iRQ8KLISthNtNU=');
+        expect(decoded, 'hello world!!!!\n');
+      });
+    });
+
+    group('long', () {
+      test('Encoding', () {
+        String value = aesKey1.encryptToBase64('Lorem ipsum dolor sit amet, consectetur adipiscing elit ........\n');
+        expect(value, 'MR2pq72G8HPSyM8CzTcWkq5771gkoBPU/4fSQQSKVJUGjnDw5jrmCDchRIsd2XrfiWsbYG63PjfIG+OOJuVuqHgivoT6O+DtU5/4femIJTo=');
+      });
+
+      test('Decode', () {
+        final decoded = aesKey1.decryptToUtf8('MR2pq72G8HPSyM8CzTcWkq5771gkoBPU/4fSQQSKVJUGjnDw5jrmCDchRIsd2XrfiWsbYG63PjfIG+OOJuVuqHgivoT6O+DtU5/4femIJTo=');
+        expect(decoded, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit ........\n');
+      });
     });
   });
 }

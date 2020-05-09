@@ -3,7 +3,7 @@ import 'dart:typed_data';
 
 import 'padder.dart';
 
-class EmePkcs1V15Encoder implements BlockPadder, IndividualBlockPadder {
+class EmePkcs1V15Encoder implements Padder, IndividualBlockPadder {
   final Random rand;
 
   EmePkcs1V15Encoder({Random rand}) : rand = rand ?? Random.secure();

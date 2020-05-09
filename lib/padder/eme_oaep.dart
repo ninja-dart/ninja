@@ -7,15 +7,17 @@ import 'package:ninja/padder/mgf/mgf.dart';
 import 'package:ninja/padder/padder.dart';
 import 'package:ninja/utils/iterable.dart';
 
-class OAEPPadder implements BlockPadder, IndividualBlockPadder {
+final sha1OaepPadder = OAEPPadder();
+
+class OAEPPadder implements Padder, IndividualBlockPadder {
   final crypto.Hash hasher;
 
   final Mgf mgf;
 
   final Random random;
 
-  OAEPPadder({crypto.Hash hasher, this.random, Mgf mgf})
-      : hasher = hasher ?? crypto.sha1,
+  OAEPPadder({crypto.Hash hasher, Random random, Mgf mgf})
+      : random = random ?? Random.secure(), hasher = hasher ?? crypto.sha1,
         mgf = mgf ?? mgf1Sha1;
 
   void padBlock(int blockSize, Iterable<int> block, ByteData output,
