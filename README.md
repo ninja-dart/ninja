@@ -78,4 +78,11 @@ print(decrypted);
 > TODO
 
 
-## 
+# TODO
+
++ [ ] RSA OAEP
++ [ ] RSASSA-PSS
++ [ ] RSA key generation
++ [ ] AES key derivation
++ [ ] More block cipher modes
++ [ ] PEM parser
