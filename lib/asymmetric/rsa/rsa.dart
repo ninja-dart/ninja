@@ -7,6 +7,7 @@ import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
 import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
 import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
 import 'package:ninja/asymmetric/rsa/signer/rsassa_pks1_v15.dart';
+import 'package:ninja/formats/pem/pem.dart';
 import 'package:ninja/ninja.dart';
 import 'package:ninja/utils/big_int.dart';
 import 'package:ninja/utils/hex_string.dart';
@@ -19,7 +20,7 @@ class RSAPublicKey {
 
   // TODO better exceptions
   factory RSAPublicKey.fromASN1(String input) {
-    final asn1 = ASN1Parser(base64.decode(input));
+    final asn1 = ASN1Parser(base64Decode(input));
     if (!asn1.hasNext()) {
       throw Exception("Invalid structure");
     }
@@ -69,7 +70,8 @@ class RSAPublicKey {
   }
 
   factory RSAPublicKey.fromPEM(String input) {
-    // TODO
+    return RSAPublicKey.fromASN1(
+        PemPart.decodeLabelled(input, ['RSA PUBLIC KEY', 'PUBLIC KEY']).data);
   }
 
   /// Modulus
@@ -117,8 +119,7 @@ class RSAPublicKey {
     return encrypt(input, padder: EmePkcs1V15Encoder(rand: rand));
   }
 
-  String encryptPkcsToHex(/* String | Iterable<int> */ input,
-      {Random rand}) {
+  String encryptPkcsToHex(/* String | Iterable<int> */ input, {Random rand}) {
     return encryptToHex(input, padder: EmePkcs1V15Encoder(rand: rand));
   }
 
@@ -142,6 +143,10 @@ class RSAPublicKey {
       {EmsaHasher hasher}) {
     return RsassaPkcs1V15Verifier(this, hasher: hasher).verify(signature, msg);
   }
+
+  // TODO toASN1
+
+  // TODO toPEM
 
   String toString() => 'RSAPublicKey(n: $n, e: $e)';
 }
@@ -175,7 +180,8 @@ class RSAPrivateKey {
   }
 
   factory RSAPrivateKey.fromPEM(String input) {
-    // TODO
+    return RSAPrivateKey.fromASN1(
+        PemPart.decodeLabelled(input, ['RSA PRIVATE KEY', 'PRIVATE KEY']).data);
   }
 
   static RSAPrivateKey _fromASN1Sequence(ASN1Sequence rootSequence) {
@@ -257,7 +263,8 @@ class RSAPrivateKey {
 
   String decrypt(/* String | List<int> */ input,
       {Padder padder, bool raw = false}) {
-    return utf8.decode(decryptToBytes(input, padder: padder, raw: raw).toList());
+    return utf8
+        .decode(decryptToBytes(input, padder: padder, raw: raw).toList());
   }
 
   Iterable<int> decryptPkcsToBytes(/* String | List<int> */ input) {
@@ -288,6 +295,10 @@ class RSAPrivateKey {
   }
 
   RSAPublicKey get toPublicKey => RSAPublicKey(n, e);
+
+  // TODO toASN1
+
+  // TODO toPEM
 
   String toString() => 'RSAPrivateKey(n: $n, e: $e, d: $d, p: $p, q: $q)';
 }

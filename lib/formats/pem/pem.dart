@@ -15,14 +15,14 @@ class PemPart {
     throw Exception('No block found');
   }
 
-  factory PemPart.decodeLabelled(String pem, String label) {
+  factory PemPart.decodeLabelled(String pem, List<String> labels) {
     final lines = pem.split(_newlineRegexp).reversed.toList();
 
     while(true) {
       final part = _decodeNextPem(lines);
       if(part == null) break;
 
-      if(part.label == label) return part;
+      if(labels.contains(part.label)) return part;
     }
 
     throw Exception('No block found');

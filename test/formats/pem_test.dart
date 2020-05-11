@@ -100,7 +100,7 @@ Y29uc2VjdGV0dXIgYWRpcGlzY2luZyBlbGl0Li4uTG9yZW0gaXBzdW0gZG9sb3Ig
 c2l0IGFtZXQsIGNvbnNlY3RldHVyIGFkaXBpc2NpbmcgZWxpdC4uLkxvcmVtIGlw
 c3VtIGRvbG9yIHNpdCBhbWV0LCBjb25zZWN0ZXR1ciBhZGlwaXNjaW5nIGVsaXQu
 Li4K
------END KEY1-----''', 'KEY1'),
+-----END KEY1-----''', ['KEY1']),
           PemPart(
               'KEY1',
               base64Encode(

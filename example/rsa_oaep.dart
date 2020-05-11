@@ -22,5 +22,5 @@ void main() {
   print(encrypted);
   String decrypted = privKey.decryptOaep(encrypted);
   print(decrypted);
-  print(decrypted.codeUnits);
+  print(decrypted.runes);
 }
