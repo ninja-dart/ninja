@@ -17,7 +17,8 @@ class OAEPPadder implements Padder, IndividualBlockPadder {
   final Random random;
 
   OAEPPadder({crypto.Hash hasher, Random random, Mgf mgf})
-      : random = random ?? Random.secure(), hasher = hasher ?? crypto.sha1,
+      : random = random ?? Random.secure(),
+        hasher = hasher ?? crypto.sha1,
         mgf = mgf ?? mgf1Sha1;
 
   void padBlock(int blockSize, Iterable<int> block, ByteData output,
@@ -102,7 +103,7 @@ class OAEPPadder implements Padder, IndividualBlockPadder {
         labelHash.length, (i) => seedMask[i] ^ maskedSeed[i]);
 
     final dbMask = mgf.encode(blockSize - labelHash.length - 1, seed);
-    var db = List<int>.generate(
+    Iterable<int> db = List<int>.generate(
         blockSize - labelHash.length - 1, (i) => dbMask[i] ^ maskedDb[i]);
 
     final labelHashDash = db.take(labelHash.length);
@@ -111,15 +112,17 @@ class OAEPPadder implements Padder, IndividualBlockPadder {
     }
     db = db.skip(labelHash.length);
 
-    final oneIndex = db.firstWhere((v) => v == 0x01, orElse: () => null);
-    if (oneIndex == null) {
-      throw Exception('Invalid block. Cannot find message delimiter');
-    }
-    if (db.take(oneIndex).any((v) => v != 0)) {
-      throw Exception('Invalid block. Found non-zero element in PS');
+    db = db.skipWhile((value) => value == 0);
+
+    if(db.isEmpty) {
+      throw Exception('Invalid block. No delimiter');
     }
 
-    return db.skip(oneIndex + 1);
+    if(db.first != 0x01) {
+      throw Exception('Invalid block. Invalid delimiter');
+    }
+
+    return db.skip(1);
   }
 
   Iterable<int> unpad(int blockSize, Iterable<int> input,

@@ -101,12 +101,11 @@ class RSAPublicKey {
   }
 
   String encrypt(/* String | Iterable<int> */ input, {Padder padder}) {
-    return hexEncoder.convert(encryptToBytes(input, padder: padder));
+    return base64Encode(encryptToBytes(input, padder: padder));
   }
 
-  String encryptToBase64(/* String | Iterable<int> */ input,
-      {Padder padder}) {
-    return base64Encode(encryptToBytes(input, padder: padder));
+  String encryptToHex(/* String | Iterable<int> */ input, {Padder padder}) {
+    return hexEncode(encryptToBytes(input, padder: padder));
   }
 
   Iterable<int> encryptPkcsToBytes(/* String | Iterable<int> */ input,
@@ -118,27 +117,24 @@ class RSAPublicKey {
     return encrypt(input, padder: EmePkcs1V15Encoder(rand: rand));
   }
 
-  String encryptPkcsToBase64(/* String | Iterable<int> */ input,
+  String encryptPkcsToHex(/* String | Iterable<int> */ input,
       {Random rand}) {
-    return encryptToBase64(input, padder: EmePkcs1V15Encoder(rand: rand));
+    return encryptToHex(input, padder: EmePkcs1V15Encoder(rand: rand));
   }
 
-  Iterable<int> encryptOaepToBytes(
-      /* String | Iterable<int> */ input,
-      OAEPPadder oaepPadder) {
-    return encryptToBytes(input, padder: oaepPadder);
+  Iterable<int> encryptOaepToBytes(/* String | Iterable<int> */ input,
+      {OAEPPadder oaepPadder}) {
+    return encryptToBytes(input, padder: oaepPadder ?? oaepPadder);
   }
 
-  String encryptOaep(
-      /* String | Iterable<int> */ input,
-      OAEPPadder oaepPadder) {
-    return encrypt(input, padder: oaepPadder);
+  String encryptOaep(/* String | Iterable<int> */ input,
+      {OAEPPadder oaepPadder}) {
+    return encrypt(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
-  String encryptOaepToBase64(
-      /* String | Iterable<int> */ input,
-      OAEPPadder oaepPadder) {
-    return encryptToBase64(input, padder: oaepPadder);
+  String encryptOaepToHex(/* String | Iterable<int> */ input,
+      {OAEPPadder oaepPadder}) {
+    return encryptToHex(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   bool verifySsaPkcs1V15(/* String | List<int> | BigInt */ signature,
@@ -244,7 +240,7 @@ class RSAPrivateKey {
       {Padder padder, bool raw = false}) {
     Uint8List inputBytes;
     if (input is String) {
-      inputBytes = hexDecoder.convert(input);
+      inputBytes = base64Decode(input);
     } else if (input is Uint8List) {
       inputBytes = input;
     } else if (input is List<int>) {
@@ -261,7 +257,7 @@ class RSAPrivateKey {
 
   String decrypt(/* String | List<int> */ input,
       {Padder padder, bool raw = false}) {
-    return utf8.decode(decryptToBytes(input, padder: padder, raw: raw));
+    return utf8.decode(decryptToBytes(input, padder: padder, raw: raw).toList());
   }
 
   Iterable<int> decryptPkcsToBytes(/* String | List<int> */ input) {
@@ -272,14 +268,13 @@ class RSAPrivateKey {
     return decrypt(input, padder: EmePkcs1V15Encoder());
   }
 
-  Iterable<int> decryptOaepToBytes(
-      /* String | List<int> */ input,
-      OAEPPadder oaepPadder) {
-    return decryptToBytes(input, padder: oaepPadder);
+  Iterable<int> decryptOaepToBytes(/* String | List<int> */ input,
+      {OAEPPadder oaepPadder}) {
+    return decryptToBytes(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
-  String decryptOaep(/* String | List<int> */ input, OAEPPadder oaepPadder) {
-    return decrypt(input, padder: oaepPadder);
+  String decryptOaep(/* String | List<int> */ input, {OAEPPadder oaepPadder}) {
+    return decrypt(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   List<int> signSsaPkcs1V15ToBytes(final /* String | List<int> | BigInt */ msg,

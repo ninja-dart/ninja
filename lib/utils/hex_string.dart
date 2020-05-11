@@ -44,3 +44,7 @@ const hexDecoder = HexStringDecoder();
 const hexEncoder = HexStringEncoder();
 
 const hexCodec = HexCodec();
+
+Uint8List hexDecode(String input) => hexDecoder.convert(input);
+
+String hexEncode(Iterable<int> input) => hexEncoder.convert(input);
