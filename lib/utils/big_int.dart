@@ -1,6 +1,8 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
+import 'package:ninja/ninja.dart';
+
 // This file has been copied and modified from pointy_castles package. See file
 // LICENSE/pointy_castle_LICENSE file for more information.
 
@@ -46,4 +48,20 @@ BigInt base64ToBigInt(String input) {
 String bigIntToBase64(BigInt input) {
   final bytes = bigIntToBytes(input);
   return base64.encode(bytes);
+}
+
+String intStringToHex(String input) {
+  return hexEncode(bigIntToBytes(BigInt.parse(input)));
+}
+
+String hexToIntString(String input) {
+  return bytesToBigInt(hexDecode(input)).toRadixString(10);
+}
+
+String bigIntToHex(BigInt input) {
+  return hexEncode(bigIntToBytes(input));
+}
+
+BigInt hexToBigInt(String input) {
+  return bytesToBigInt(hexDecode(input));
 }
