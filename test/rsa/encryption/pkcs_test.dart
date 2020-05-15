@@ -17,8 +17,8 @@ void main() {
     });
 
     test('small_msg_dencryptOpenssl', () {
-      final decoded = privateKey.decryptPkcs(
-          hexDecode('253D6BCFBE654D5B07179719ECB250218AFEBCF555FD6CC56C3C64838BE719B44484C7916106B81C722AF245886172A5233B44234B36E61186CA77E513404514'));
+      final decoded = privateKey.decryptPkcs(hexDecode(
+          '253D6BCFBE654D5B07179719ECB250218AFEBCF555FD6CC56C3C64838BE719B44484C7916106B81C722AF245886172A5233B44234B36E61186CA77E513404514'));
       expect(decoded, 'hello world!\n');
     });
 

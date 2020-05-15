@@ -18,11 +18,11 @@ class PemPart {
   factory PemPart.decodeLabelled(String pem, List<String> labels) {
     final lines = pem.split(_newlineRegexp).reversed.toList();
 
-    while(true) {
+    while (true) {
       final part = _decodeNextPem(lines);
-      if(part == null) break;
+      if (part == null) break;
 
-      if(labels.contains(part.label)) return part;
+      if (labels.contains(part.label)) return part;
     }
 
     throw Exception('No block found');
@@ -61,8 +61,8 @@ class PemPart {
     return sb.toString();
   }
 
-  bool operator==(other) {
-    if(other is PemPart) {
+  bool operator ==(other) {
+    if (other is PemPart) {
       return label == other.label && data == other.data;
     }
 
@@ -126,28 +126,28 @@ PemPart _decodeNextPem(List<String> input) {
     break;
   }
 
-  if(label == null) return null;
+  if (label == null) return null;
 
-  while(input.isNotEmpty && _isEmptyLine(input.last)) {
+  while (input.isNotEmpty && _isEmptyLine(input.last)) {
     input.removeLast();
   }
 
-  if(input.isEmpty) {
+  if (input.isEmpty) {
     throw Exception('Unexpected end of text');
   }
 
   final sb = StringBuffer();
-  while(input.isNotEmpty && !_isEndOfBlock(input.last)) {
+  while (input.isNotEmpty && !_isEndOfBlock(input.last)) {
     String line = input.removeLast();
     int index = line.lastIndexOf(PemPart._base64Regexp);
-    if(index == null) {
+    if (index == null) {
       throw Exception('Invalid data line');
     }
-    if(index > 64) {
+    if (index > 64) {
       throw Exception('Data line too long');
     }
 
-    if(line.substring(index + 1).runes.any(_isNotWhitespace)) {
+    if (line.substring(index + 1).runes.any(_isNotWhitespace)) {
       throw Exception('Invalid data line');
     }
 
@@ -155,7 +155,7 @@ PemPart _decodeNextPem(List<String> input) {
     sb.write(data);
   }
 
-  if(input.isEmpty) {
+  if (input.isEmpty) {
     throw Exception('Unexpected end of text');
   }
 
@@ -165,9 +165,9 @@ PemPart _decodeNextPem(List<String> input) {
 }
 
 bool _isEmptyLine(String input) {
-  if(input.isEmpty) return true;
+  if (input.isEmpty) return true;
 
-  if(input.runes.any(_isNotWhitespace)) {
+  if (input.runes.any(_isNotWhitespace)) {
     return false;
   }
 

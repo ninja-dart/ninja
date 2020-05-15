@@ -24,20 +24,25 @@ void main() {
       });
 
       test('Decode', () {
-        final decoded = aesKey1.decryptToUtf8('PGxrnKUS/zhDneaO3c0APkKdSMS47iRQ8KLISthNtNU=');
+        final decoded = aesKey1
+            .decryptToUtf8('PGxrnKUS/zhDneaO3c0APkKdSMS47iRQ8KLISthNtNU=');
         expect(decoded, 'hello world!!!!\n');
       });
     });
 
     group('long', () {
       test('Encoding', () {
-        String value = aesKey1.encryptToBase64('Lorem ipsum dolor sit amet, consectetur adipiscing elit ........\n');
-        expect(value, 'MR2pq72G8HPSyM8CzTcWkq5771gkoBPU/4fSQQSKVJUGjnDw5jrmCDchRIsd2XrfiWsbYG63PjfIG+OOJuVuqHgivoT6O+DtU5/4femIJTo=');
+        String value = aesKey1.encryptToBase64(
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit ........\n');
+        expect(value,
+            'MR2pq72G8HPSyM8CzTcWkq5771gkoBPU/4fSQQSKVJUGjnDw5jrmCDchRIsd2XrfiWsbYG63PjfIG+OOJuVuqHgivoT6O+DtU5/4femIJTo=');
       });
 
       test('Decode', () {
-        final decoded = aesKey1.decryptToUtf8('MR2pq72G8HPSyM8CzTcWkq5771gkoBPU/4fSQQSKVJUGjnDw5jrmCDchRIsd2XrfiWsbYG63PjfIG+OOJuVuqHgivoT6O+DtU5/4femIJTo=');
-        expect(decoded, 'Lorem ipsum dolor sit amet, consectetur adipiscing elit ........\n');
+        final decoded = aesKey1.decryptToUtf8(
+            'MR2pq72G8HPSyM8CzTcWkq5771gkoBPU/4fSQQSKVJUGjnDw5jrmCDchRIsd2XrfiWsbYG63PjfIG+OOJuVuqHgivoT6O+DtU5/4femIJTo=');
+        expect(decoded,
+            'Lorem ipsum dolor sit amet, consectetur adipiscing elit ........\n');
       });
     });
   });

@@ -114,11 +114,11 @@ class OAEPPadder implements Padder, IndividualBlockPadder {
 
     db = db.skipWhile((value) => value == 0);
 
-    if(db.isEmpty) {
+    if (db.isEmpty) {
       throw Exception('Invalid block. No delimiter');
     }
 
-    if(db.first != 0x01) {
+    if (db.first != 0x01) {
       throw Exception('Invalid block. Invalid delimiter');
     }
 

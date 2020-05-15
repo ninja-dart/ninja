@@ -57,7 +57,7 @@ class CbcBlockCipherMode {
       mangler = Uint8List(cipher.blockSize);
     }
 
-    if(input is String) {
+    if (input is String) {
       input = base64Decode(input);
     }
 
@@ -75,7 +75,7 @@ class CbcBlockCipherMode {
     }
 
     final unpadded = padder.unpad(cipher.blockSize, decrypted).toList();
-    
+
     return unpadded;
   }
 }
