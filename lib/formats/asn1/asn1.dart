@@ -762,6 +762,45 @@ class ASN1BitString implements ASN1Object {
   }
 }
 
+class ASN1Unknown implements ASN1Object {
+  int tag;
+
+  Uint8List value;
+
+  ASN1Unknown(this.tag, this.value);
+
+  factory ASN1Unknown.decode(final Iterable<int> bytes) =>
+      parse(MutableIterable(bytes));
+
+  static ASN1Unknown parse(final MutableIterable bytes) {
+    if (bytes.length < 2) {
+      throw Exception('Invalid data!');
+    }
+
+    int tag = bytes.first;
+    bytes.mutate = bytes.skip(1);
+
+    final lengthBigInt = ASN1Object.decodeLength(bytes);
+    int length = lengthBigInt.toInt();
+    if (length == 0) {
+      throw Exception('Invalid data');
+    }
+
+    if (bytes.length < length) {
+      throw Exception('Invalid data');
+    }
+
+    final contentBytes = bytes.take(length).toList();
+    bytes.mutate = bytes.skip(length);
+
+    return ASN1Unknown(tag & 0x3F, Uint8List.fromList(contentBytes));
+  }
+
+  Uint8List encode() {
+    return ASN1Object.pack(tag, value);
+  }
+}
+
 // TODO IA5String
 
 // TODO utf8String

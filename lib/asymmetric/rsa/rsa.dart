@@ -2,6 +2,8 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:ninja_prime/ninja_prime.dart';
+
 import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
 import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
 import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
@@ -181,8 +183,56 @@ class RSAPrivateKey {
     _engine = RSADecryptionEngine(this);
   }
 
-  factory RSAPrivateKey.generate() {
-    // TODO
+  factory RSAPrivateKey.generate(int keySize, {BigInt publicExponent}) {
+    publicExponent ??= BigInt.from(0x01001);
+
+    BigInt p;
+    while(true) {
+      p = randomPrimeBigInt(keySize~/2);
+
+      if(p % publicExponent == BigInt.one) {
+        continue;
+      }
+
+      if(publicExponent.gcd(p - BigInt.one) == BigInt.one) {
+        break;
+      }
+    }
+
+    BigInt q;
+    BigInt n;
+    int qBitLength = keySize - p.bitLength;
+    while(true) {
+      q = randomPrimeBigInt(qBitLength);
+
+      if(p == q) {
+        continue;
+      }
+
+      if(q % publicExponent == BigInt.one) {
+        continue;
+      }
+
+      if(publicExponent.gcd(q - BigInt.one) != BigInt.one) {
+        continue;
+      }
+
+      n = p * q;
+      final nBitlength = n.bitLength;
+      if(nBitlength != keySize) {
+        continue;
+      }
+
+      if(p < q) {
+        BigInt tmp = p;
+        p = q;
+        q = tmp;
+      }
+
+      BigInt d = publicExponent.modInverse((p - BigInt.one) * (q - BigInt.one));
+
+      return RSAPrivateKey(n, publicExponent, d, p, q);
+    }
   }
 
   factory RSAPrivateKey.fromASN1(dynamic /* String | Iterable<int> */ input,
