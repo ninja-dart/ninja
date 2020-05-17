@@ -1,3 +1,4 @@
+import 'dart:convert';
 import 'dart:typed_data';
 
 import 'package:collection/collection.dart';
@@ -100,6 +101,7 @@ class ASN1Type {
     return false;
   }
 
+  static const endOfContentTag = 0x00;
   static const booleanTag = 0x01;
   static const integerTag = 2;
   static const bitStringTag = 3;
@@ -115,6 +117,11 @@ class ASN1Type {
 }
 
 abstract class ASN1Object {
+  factory ASN1Object.decode(/* Iterable<int> | String */ input) {
+    if (input is String) input = base64Decode(input);
+    return parse(MutableIterable(input));
+  }
+
   int get tag;
 
   Uint8List encode();
@@ -185,6 +192,8 @@ abstract class ASN1Object {
         return ASN1ObjectIdentifier.parse(bytes);
       case ASN1Type.bitStringTag:
         return ASN1BitString.parse(bytes);
+      case ASN1Type.endOfContentTag:
+        return ASN1EndOfContent.parse(bytes);
       default:
         throw UnimplementedError();
     }
@@ -194,6 +203,46 @@ abstract class ASN1Object {
 typedef ASN1Parser = ASN1Object Function(MutableIterable bytes,
     {Map<int, dynamic> parsers});
 
+class ASN1EndOfContent implements ASN1Object {
+  final int tag = ASN1Type.endOfContentTag;
+
+  const ASN1EndOfContent();
+
+  factory ASN1EndOfContent.decode(final Iterable<int> bytes) =>
+      parse(MutableIterable(bytes));
+
+  static ASN1EndOfContent parse(final MutableIterable bytes) {
+    if (bytes.length < 2) {
+      throw Exception('Invalid data!');
+    }
+
+    int tag = bytes.first;
+    if (tag != ASN1Type.endOfContentTag) {
+      throw Exception('Invalid tag!');
+    }
+    bytes.mutate = bytes.skip(1);
+
+    if (bytes.first != 0) {
+      throw Exception('Invalid length!');
+    }
+    bytes.mutate = bytes.skip(1);
+
+    return ASN1EndOfContent();
+  }
+
+  Uint8List encode() {
+    final ret = Uint8List(2);
+    ret[0] = tag;
+    ret[1] = 0;
+
+    return ret;
+  }
+
+  bool operator ==(dynamic other) {
+    return other is ASN1EndOfContent;
+  }
+}
+
 class ASN1Sequence implements ASN1Object {
   final int tag = ASN1Type.sequenceTag;
 
@@ -202,8 +251,8 @@ class ASN1Sequence implements ASN1Object {
   ASN1Sequence(Iterable<ASN1Object> children)
       : children = List<ASN1Object>.from(children);
 
-  factory ASN1Sequence.decode(Iterable<int> bytes) =>
-      parse(MutableIterable(bytes));
+  factory ASN1Sequence.decode(/* Iterable<int> | String */ bytes) => parse(
+      MutableIterable(bytes is Iterable<int> ? bytes : base64Decode(bytes)));
 
   static ASN1Sequence parse(final MutableIterable bytes) {
     if (bytes.length < 3) {
@@ -215,6 +264,8 @@ class ASN1Sequence implements ASN1Object {
       throw Exception('Invalid tag!');
     }
     bytes.mutate = bytes.skip(1);
+
+    final children = <ASN1Object>[];
 
     if (bytes.first != 0x80) {
       final lengthBigInt = ASN1Object.decodeLength(bytes);
@@ -230,7 +281,6 @@ class ASN1Sequence implements ASN1Object {
       final contentBytes = MutableIterable(bytes.take(length));
       bytes.mutate = bytes.skip(length);
 
-      final children = <ASN1Object>[];
       while (contentBytes.isNotEmpty) {
         children.add(ASN1Object.parse(contentBytes));
       }
@@ -238,9 +288,23 @@ class ASN1Sequence implements ASN1Object {
       return ASN1Sequence(children);
     }
 
-    // TODO
+    bytes.mutate = bytes.skip(1);
+    bool foundEnd = false;
 
-    throw UnimplementedError('Indefinite length form is not supported yet');
+    while (bytes.isNotEmpty) {
+      final child = ASN1Object.parse(bytes);
+      if (child is ASN1EndOfContent) {
+        foundEnd = true;
+        break;
+      }
+      children.add(child);
+    }
+
+    if (!foundEnd) {
+      throw Exception('Invalid data. End of content not found');
+    }
+
+    return ASN1Sequence(children);
   }
 
   Uint8List encode() {
@@ -354,7 +418,11 @@ class ASN1Integer implements ASN1Object {
 
   Uint8List encode() {
     Uint8List content = bigIntToBytes(value,
-        outLen: value.isNegative ? null : ((value.bitLength + 7) >> 3) + 1);
+        outLen: value.isNegative
+            ? null
+            : value.bitLength % 8 == 0
+                ? ((value.bitLength + 7) >> 3) + 1
+                : null);
     return ASN1Object.pack(tag, content);
   }
 
