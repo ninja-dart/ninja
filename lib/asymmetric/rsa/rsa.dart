@@ -2,7 +2,6 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
-import 'package:asn1lib/asn1lib.dart' as asn1lib;
 import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
 import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
 import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
@@ -10,7 +9,6 @@ import 'package:ninja/asymmetric/rsa/signer/rsassa_pks1_v15.dart';
 import 'package:ninja/formats/asn1/asn1.dart';
 import 'package:ninja/formats/pem/pem.dart';
 import 'package:ninja/ninja.dart';
-import 'package:ninja/utils/big_int.dart';
 import 'package:ninja/utils/hex_string.dart';
 
 /// Public key for RSA encryption
@@ -39,25 +37,25 @@ class RSAPublicKey {
 
       if (seq.children[0] is! ASN1Sequence) {
         throw Exception('Invalid structure');
-      } else {
-        final algIdentifier = seq.children[0] as ASN1Sequence;
-
-        if (algIdentifier.children.isEmpty) {
-          throw Exception('Invalid structure');
-        }
-
-        if (algIdentifier.children.first is! ASN1ObjectIdentifier) {
-          throw Exception('Invalid structure');
-        }
-
-        final ASN1ObjectIdentifier identifer = algIdentifier.children.first;
-
-        if (identifer.objectIdentifierAsString != '1.2.840.113549.1.1.1') {
-          throw Exception('Invalid structure');
-        }
-
-        input = bitString.bitString;
       }
+
+      final algIdentifier = seq.children[0] as ASN1Sequence;
+
+      if (algIdentifier.children.isEmpty) {
+        throw Exception('Invalid structure');
+      }
+
+      if (algIdentifier.children.first is! ASN1ObjectIdentifier) {
+        throw Exception('Invalid structure');
+      }
+
+      final ASN1ObjectIdentifier identifer = algIdentifier.children.first;
+
+      if (identifer.objectIdentifierAsString != '1.2.840.113549.1.1.1') {
+        throw Exception('Invalid structure');
+      }
+
+      input = bitString.bitString;
     }
 
     final seq = ASN1Sequence.decode(input);
@@ -72,59 +70,6 @@ class RSAPublicKey {
 
     final numbers =
         seq.children.cast<ASN1Integer>().map((e) => e.value).toList();
-
-    return RSAPublicKey(numbers[0], numbers[1]);
-  }
-
-  // TODO better exceptions
-  factory RSAPublicKey.fromASN1Old(String input) {
-    final asn1 = asn1lib.ASN1Parser(base64Decode(input));
-    if (!asn1.hasNext()) {
-      throw Exception("Invalid structure");
-    }
-    final root = asn1.nextObject();
-    if (root is! asn1lib.ASN1Sequence) throw Exception('Invalid structure');
-
-    final rootChildren = (root as asn1lib.ASN1Sequence).elements;
-    if (rootChildren.length != 2) throw Exception('Invalid structure');
-    if (rootChildren.first is! asn1lib.ASN1Sequence) {
-      throw Exception('Invalid structure');
-    } else {
-      final objSequence = rootChildren.first as asn1lib.ASN1Sequence;
-      if (objSequence.elements.isEmpty) {
-        throw Exception('Invalid structure');
-      }
-
-      if (objSequence.elements.first is! asn1lib.ASN1ObjectIdentifier) {
-        throw Exception('Invalid input');
-      } else {
-        final identifier =
-            (objSequence.elements.first as asn1lib.ASN1ObjectIdentifier)
-                .identifier;
-        if (identifier != '1.2.840.113549.1.1.1') {
-          throw Exception('Invalid identifier');
-        }
-      }
-    }
-
-    if (rootChildren[1] is! asn1lib.ASN1BitString) {
-      throw Exception('Invalid structure');
-    }
-
-    final inner = asn1lib.ASN1Sequence.fromBytes(
-        (rootChildren[1] as asn1lib.ASN1BitString).contentBytes());
-    if (inner.elements.length != 2) {
-      throw Exception('Invalid structure');
-    }
-
-    if (inner.elements.any((e) => e is! asn1lib.ASN1Integer)) {
-      throw Exception('Invalid structure');
-    }
-
-    final numbers = inner.elements
-        .map<BigInt>(
-            (e) => bytesToBigInt((e as asn1lib.ASN1Integer).valueBytes()))
-        .toList();
 
     return RSAPublicKey(numbers[0], numbers[1]);
   }
@@ -205,16 +150,17 @@ class RSAPublicKey {
     return RsassaPkcs1V15Verifier(this, hasher: hasher).verify(signature, msg);
   }
 
-  String toASN1({bool toPkcs1 = false}) {
+  String toASN1({bool toPkcs1 = false, Iterable<ASN1Object> parameters}) {
     final encoded = ASN1Sequence([ASN1Integer(n), ASN1Integer(e)]).encode();
     if (toPkcs1) {
       return base64Encode(encoded);
     }
     return base64Encode(ASN1Sequence([
       ASN1Sequence([
-        ASN1ObjectIdentifier.fromString(
-            '1.2.840.113549.1.1.1'), /* TODO parameters */
-        ASN1Null(),
+        ASN1ObjectIdentifier.fromString('1.2.840.113549.1.1.1'),
+        ...(parameters != null && parameters.isNotEmpty
+            ? parameters
+            : [ASN1Null()]),
       ]),
       ASN1BitString(encoded)
     ]).encode());
@@ -239,64 +185,63 @@ class RSAPrivateKey {
     // TODO
   }
 
-  factory RSAPrivateKey.fromASN1(String input) {
-    final p = asn1lib.ASN1Parser(base64.decode(input));
-    if (!p.hasNext()) throw Exception('Invalid structure');
-    final rootSequence = p.nextObject();
-    if (rootSequence is! asn1lib.ASN1Sequence) {
-      throw Exception('Invalid structure');
-    }
-
-    {
-      final pcks8 = _isPkcs8(rootSequence);
-      if (pcks8 != null) {
-        return _fromASN1Sequence(pcks8);
+  factory RSAPrivateKey.fromASN1(dynamic /* String | Iterable<int> */ input,
+      {bool fromPkcs1 = true}) {
+    if (!fromPkcs1) {
+      final seq = ASN1Sequence.decode(input);
+      if (seq.children.length != 3) {
+        throw Exception('Invalid structure');
       }
+
+      if (seq.children[2] is! ASN1OctetString) {
+        throw Exception('Invalid structure');
+      }
+
+      final bitString = seq.children[2] as ASN1OctetString;
+
+      if (seq.children[1] is! ASN1Sequence) {
+        throw Exception('Invalid structure');
+      }
+
+      final algIdentifier = seq.children[1] as ASN1Sequence;
+
+      if (algIdentifier.children.isEmpty) {
+        throw Exception('Invalid structure');
+      }
+
+      if (algIdentifier.children.first is! ASN1ObjectIdentifier) {
+        throw Exception('Invalid structure');
+      }
+
+      final ASN1ObjectIdentifier identifer = algIdentifier.children.first;
+
+      if (identifer.objectIdentifierAsString != '1.2.840.113549.1.1.1') {
+        throw Exception('Invalid structure');
+      }
+
+      input = bitString.value;
     }
 
-    return _fromASN1Sequence(rootSequence);
-  }
+    final seq = ASN1Sequence.decode(input);
 
-  factory RSAPrivateKey.fromPEM(String input) {
-    return RSAPrivateKey.fromASN1(
-        PemPart.decodeLabelled(input, ['RSA PRIVATE KEY', 'PRIVATE KEY']).data);
-  }
-
-  static RSAPrivateKey _fromASN1Sequence(asn1lib.ASN1Sequence rootSequence) {
-    final rootChildren = rootSequence.elements;
-    if (rootChildren.length < 6) {
+    if (seq.children.length < 9) {
       throw Exception('Invalid structure');
     }
 
-    final relevant = rootChildren.skip(1).take(5);
-    if (relevant.any((e) => e is! asn1lib.ASN1Integer)) {
+    final relevant = seq.children.skip(1).take(5);
+    if (relevant.any((el) => el is! ASN1Integer)) {
       throw Exception('Invalid structure');
     }
 
-    final bigInts = relevant
-        .map((e) => bytesToBigInt((e as asn1lib.ASN1Integer).valueBytes()))
-        .toList();
+    final bigInts = relevant.map((e) => (e as ASN1Integer).value).toList();
     return RSAPrivateKey(
         bigInts[0], bigInts[1], bigInts[2], bigInts[3], bigInts[4]);
   }
 
-  static asn1lib.ASN1Sequence _isPkcs8(asn1lib.ASN1Sequence rootSequence) {
-    if (rootSequence.elements.length != 3) return null;
-
-    if (rootSequence.elements[1] is! asn1lib.ASN1Sequence) return null;
-
-    if (!_checkObjectId(rootSequence.elements[1], "1.2.840.113549.1.1.1")) {
-      return null;
-    }
-
-    if (rootSequence.elements[2] is! asn1lib.ASN1OctetString) {
-      throw Exception("Invalid structure");
-    }
-
-    final sequence = asn1lib.ASN1Sequence.fromBytes(
-        (rootSequence.elements[2] as asn1lib.ASN1OctetString).valueBytes());
-
-    return sequence;
+  factory RSAPrivateKey.fromPEM(String input) {
+    final pem = PemPart.decodeLabelled(input, ['RSA PRIVATE KEY', 'PRIVATE KEY']);
+    return RSAPrivateKey.fromASN1(pem.data,
+        fromPkcs1: pem.label == 'RSA PRIVATE KEY');
   }
 
   /// Modulus
@@ -374,22 +319,41 @@ class RSAPrivateKey {
 
   RSAPublicKey get toPublicKey => RSAPublicKey(n, e);
 
-  // TODO toASN1
+  String toASN1({bool toPkcs1 = true, Iterable<ASN1Object> parameters}) {
+    final dModP = d % (p - BigInt.from(1));
+    final dModQ = d % (q - BigInt.from(1));
+    final coefficient = q.modInverse(p);
+    final encoded = ASN1Sequence([
+      ASN1Integer.fromNum(0),
+      ASN1Integer(n),
+      ASN1Integer(e),
+      ASN1Integer(d),
+      ASN1Integer(p),
+      ASN1Integer(q),
+      ASN1Integer(dModP),
+      ASN1Integer(dModQ),
+      ASN1Integer(coefficient),
+    ]).encode();
+    if (toPkcs1) {
+      return base64Encode(encoded);
+    }
+    return base64Encode(ASN1Sequence([
+      ASN1Integer.fromNum(0),
+      ASN1Sequence([
+        ASN1ObjectIdentifier.fromString('1.2.840.113549.1.1.1'),
+        ...(parameters != null && parameters.isNotEmpty
+            ? parameters
+            : [ASN1Null()]),
+      ]),
+      ASN1OctetString(encoded)
+    ]).encode());
+  }
 
-  // TODO toPEM
+  String toPem({bool toPkcs1 = true}) {
+    String asn1 = toASN1(toPkcs1: toPkcs1);
+    String label = toPkcs1 ? 'RSA PRIVATE KEY' : 'PRIVATE KEY';
+    return PemPart(label, asn1).toString();
+  }
 
   String toString() => 'RSAPrivateKey(n: $n, e: $e, d: $d, p: $p, q: $q)';
-}
-
-bool _checkObjectId(asn1lib.ASN1Sequence sequence, String id) {
-  if (sequence.elements.length != 2) {
-    throw Exception("Invalid structure");
-  }
-
-  if (sequence.elements.first is! asn1lib.ASN1ObjectIdentifier) {
-    throw Exception("Invalid structure");
-  }
-
-  return (sequence.elements.first as asn1lib.ASN1ObjectIdentifier).identifier ==
-      id;
 }

@@ -31,7 +31,8 @@ void main() {
       });
       test('pkcs#8', () {
         final key = RSAPrivateKey.fromASN1(
-            'MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEA2wWNDbYbfq/yMaFw60Kda2S6qoj2ZY6rkjobLg0FvjpyHb6Bcvz+wLftfYEYBKe3ZjKYCbvHBLb5ATz1hi8N0QIDAQABAkEAtR0oATigD+kLDEOGDuVtK4uGWNMdfem2sxrdsv0NzLkcWZ6u6XRfq1G7dCagiGom4B93y6UR0KYQvPGLD+DHiQIhAO16txmxxKLU7XJ5Mj7vCg88EpU5DjptyT7GDM0dHADXAiEA7BpT3JnuY5M0RTuHSzcaqSB8p2oVP3h60ebnwHsVCZcCIBx5ZE7uY7dqdHYPVhj5rGkbONcvmicjVsfyE0LcxKjNAiEAjzw9qjScoj441NOTdbcdboNt/GboMxRVdqgd6vEAx0sCIEifY2LV3oO4JJCUN8aRjFJlAXe1vTnDnQLOD/u844Ed');
+            'MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEA2wWNDbYbfq/yMaFw60Kda2S6qoj2ZY6rkjobLg0FvjpyHb6Bcvz+wLftfYEYBKe3ZjKYCbvHBLb5ATz1hi8N0QIDAQABAkEAtR0oATigD+kLDEOGDuVtK4uGWNMdfem2sxrdsv0NzLkcWZ6u6XRfq1G7dCagiGom4B93y6UR0KYQvPGLD+DHiQIhAO16txmxxKLU7XJ5Mj7vCg88EpU5DjptyT7GDM0dHADXAiEA7BpT3JnuY5M0RTuHSzcaqSB8p2oVP3h60ebnwHsVCZcCIBx5ZE7uY7dqdHYPVhj5rGkbONcvmicjVsfyE0LcxKjNAiEAjzw9qjScoj441NOTdbcdboNt/GboMxRVdqgd6vEAx0sCIEifY2LV3oO4JJCUN8aRjFJlAXe1vTnDnQLOD/u844Ed',
+            fromPkcs1: false);
         print(key);
 
         expect(key.n.toString(),
