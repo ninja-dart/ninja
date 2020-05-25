@@ -1,37 +1,20 @@
 import 'dart:convert';
 
 import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
-import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
-import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
 import 'package:ninja/asymmetric/rsa/rsa.dart';
+import 'package:ninja/asymmetric/rsa/signer/signer.dart';
 import 'package:ninja/ninja.dart';
 import 'package:ninja/utils/big_int.dart';
 import 'package:ninja/utils/iterable.dart';
 
-abstract class Signer {
-  List<int> signToBytes(/* String | List<int> | BigInt */ msg);
-
-  String sign(/* String | List<int> | BigInt */ msg);
-}
-
-abstract class Verifier {
-  bool verify(
-      /* String | List<int> | BigInt */ signature,
-      /* String | List<int> | BigInt */ msg);
-}
-
-class RsassaPkcs1V15Signer implements Signer {
-  final RSAPrivateKey key;
-
+class RsassaPkcs1V15Signer implements RsaSigner {
   final EmsaHasher hasher;
 
-  final RSADecryptionEngine engine;
+  RsassaPkcs1V15Signer({EmsaHasher hasher})
+      : hasher = hasher ?? EmsaHasher.sha256;
 
-  RsassaPkcs1V15Signer(this.key, {EmsaHasher hasher})
-      : hasher = hasher ?? EmsaHasher.sha256,
-        engine = RSADecryptionEngine(key);
-
-  List<int> signToBytes(final /* String | List<int> | BigInt */ msg) {
+  List<int> signToBytes(
+      final RSAPrivateKey key, final /* String | List<int> | BigInt */ msg) {
     List<int> msgBytes;
     if (msg is List<int>) {
       msgBytes = msg;
@@ -41,32 +24,26 @@ class RsassaPkcs1V15Signer implements Signer {
       msgBytes = bigIntToBytes(msg);
     }
 
-    final encodedMessage =
-        emsaPkcs1V15Encode(msgBytes, engine.blockSize, hasher);
+    final encodedMessage = emsaPkcs1V15Encode(msgBytes, key.blockSize, hasher);
 
-    return engine.signBlock(encodedMessage);
+    return key.engine.signBlock(encodedMessage);
   }
 
-  String sign(/* String | List<int> | BigInt */ msg) {
-    final bytes = signToBytes(msg);
+  String sign(RSAPrivateKey key, /* String | List<int> | BigInt */ msg) {
+    final bytes = signToBytes(key, msg);
     return base64Encode(bytes);
   }
 }
 
-class RsassaPkcs1V15Verifier implements Verifier {
-  final RSAPublicKey key;
-
+class RsassaPkcs1V15Verifier implements RsaVerifier {
   final EmsaHasher hasher;
 
-  final RSAEncryptionEngine engine;
+  RsassaPkcs1V15Verifier({EmsaHasher hasher})
+      : hasher = hasher ?? EmsaHasher.sha256;
 
-  RsassaPkcs1V15Verifier(this.key, {EmsaHasher hasher})
-      : hasher = hasher ?? EmsaHasher.sha256,
-        engine = RSAEncryptionEngine(key);
-
-  bool verify(/* String | List<int> | BigInt */ signature,
+  bool verify(RSAPublicKey key, /* String | List<int> | BigInt */ signature,
       final /* String | List<int> | BigInt */ msg) {
-    final emDash = engine.unsign(signature);
+    final emDash = key.engine.unsign(signature);
 
     List<int> msgBytes;
     if (msg is List<int>) {
@@ -78,8 +55,7 @@ class RsassaPkcs1V15Verifier implements Verifier {
     } else {
       throw Exception('Unknown type');
     }
-    final encodedMessage =
-        emsaPkcs1V15Encode(msgBytes, engine.blockSize, hasher);
+    final encodedMessage = emsaPkcs1V15Encode(msgBytes, key.blockSize, hasher);
 
     return iterableEquality.equals(emDash, encodedMessage);
   }

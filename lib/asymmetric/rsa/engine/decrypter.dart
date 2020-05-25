@@ -60,14 +60,12 @@ class RSADecryptionEngine {
     return _convertOutput(output, out, outOff, dontPad: dontPad);
   }
 
-  List<int> signBlock(final /* BigInt | Iterable<int> | String */ message) {
+  List<int> signBlock(final /* BigInt | Iterable<int> */ message) {
     BigInt input;
     if (message is BigInt) {
       input = message;
     } else if (message is Iterable<int>) {
       input = _convertInput(message);
-    } else if (message is String) {
-      input = _convertInput(utf8.encode(message));
     } else {
       throw ArgumentError('Unknown type');
     }

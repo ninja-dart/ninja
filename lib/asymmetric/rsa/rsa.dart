@@ -2,6 +2,9 @@ import 'dart:convert';
 import 'dart:math';
 import 'dart:typed_data';
 
+import 'package:crypto/crypto.dart';
+import 'package:ninja/asymmetric/rsa/signer/emsa_pss.dart';
+import 'package:ninja/padder/mgf/mgf.dart';
 import 'package:ninja_prime/ninja_prime.dart';
 
 import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
@@ -12,6 +15,8 @@ import 'package:ninja/formats/asn1/asn1.dart';
 import 'package:ninja/formats/pem/pem.dart';
 import 'package:ninja/ninja.dart';
 import 'package:ninja/utils/hex_string.dart';
+
+export 'signer/signer.dart';
 
 /// Public key for RSA encryption
 class RSAPublicKey {
@@ -94,6 +99,8 @@ class RSAPublicKey {
 
   int get blockSize => engine.blockSize;
 
+  int get bitSize => n.bitLength;
+
   Iterable<int> encryptToBytes(/* String | Iterable<int> */ input,
       {Padder padder}) {
     Iterable<int> inputBytes;
@@ -149,7 +156,15 @@ class RSAPublicKey {
   bool verifySsaPkcs1V15(/* String | List<int> | BigInt */ signature,
       final /* String | List<int> | BigInt */ msg,
       {EmsaHasher hasher}) {
-    return RsassaPkcs1V15Verifier(this, hasher: hasher).verify(signature, msg);
+    return RsassaPkcs1V15Verifier(hasher: hasher).verify(this, signature, msg);
+  }
+
+  bool verifySsaPss(/* String | List<int> | BigInt */ signature,
+      final /* String | List<int> | BigInt */ msg,
+      {Mgf mgf, Hash hasher, int saltLength = 0, RsaSsaPssVerifier verifier}) {
+    verifier ??=
+        RsaSsaPssVerifier(mgf: mgf, hasher: hasher, saltLength: saltLength);
+    return verifier.verify(this, signature, msg);
   }
 
   String toASN1({bool toPkcs1 = false, Iterable<ASN1Object> parameters}) {
@@ -187,14 +202,14 @@ class RSAPrivateKey {
     publicExponent ??= BigInt.from(0x01001);
 
     BigInt p;
-    while(true) {
-      p = randomPrimeBigInt(keySize~/2);
+    while (true) {
+      p = randomPrimeBigInt(keySize ~/ 2);
 
-      if(p % publicExponent == BigInt.one) {
+      if (p % publicExponent == BigInt.one) {
         continue;
       }
 
-      if(publicExponent.gcd(p - BigInt.one) == BigInt.one) {
+      if (publicExponent.gcd(p - BigInt.one) == BigInt.one) {
         break;
       }
     }
@@ -202,28 +217,28 @@ class RSAPrivateKey {
     BigInt q;
     BigInt n;
     int qBitLength = keySize - p.bitLength;
-    while(true) {
+    while (true) {
       q = randomPrimeBigInt(qBitLength);
 
-      if(p == q) {
+      if (p == q) {
         continue;
       }
 
-      if(q % publicExponent == BigInt.one) {
+      if (q % publicExponent == BigInt.one) {
         continue;
       }
 
-      if(publicExponent.gcd(q - BigInt.one) != BigInt.one) {
+      if (publicExponent.gcd(q - BigInt.one) != BigInt.one) {
         continue;
       }
 
       n = p * q;
       final nBitlength = n.bitLength;
-      if(nBitlength != keySize) {
+      if (nBitlength != keySize) {
         continue;
       }
 
-      if(p < q) {
+      if (p < q) {
         BigInt tmp = p;
         p = q;
         q = tmp;
@@ -289,7 +304,8 @@ class RSAPrivateKey {
   }
 
   factory RSAPrivateKey.fromPEM(String input) {
-    final pem = PemPart.decodeLabelled(input, ['RSA PRIVATE KEY', 'PRIVATE KEY']);
+    final pem =
+        PemPart.decodeLabelled(input, ['RSA PRIVATE KEY', 'PRIVATE KEY']);
     return RSAPrivateKey.fromASN1(pem.data,
         fromPkcs1: pem.label == 'RSA PRIVATE KEY');
   }
@@ -314,6 +330,8 @@ class RSAPrivateKey {
   RSADecryptionEngine get engine => _engine;
 
   int get blockSize => engine.blockSize;
+
+  int get bitSize => n.bitLength;
 
   Iterable<int> decryptToBytes(/* String | List<int> */ input,
       {Padder padder, bool raw = false}) {
@@ -359,12 +377,40 @@ class RSAPrivateKey {
 
   List<int> signSsaPkcs1V15ToBytes(final /* String | List<int> | BigInt */ msg,
       {EmsaHasher hasher}) {
-    return RsassaPkcs1V15Signer(this, hasher: hasher).signToBytes(msg);
+    return RsassaPkcs1V15Signer(hasher: hasher).signToBytes(this, msg);
   }
 
   String signSsaPkcs1V15(/* String | List<int> | BigInt */ msg,
       {EmsaHasher hasher}) {
-    return RsassaPkcs1V15Signer(this, hasher: hasher).sign(msg);
+    return RsassaPkcs1V15Signer(hasher: hasher).sign(this, msg);
+  }
+
+  Iterable<int> signPssToBytes(final /* String | List<int> | BigInt */ msg,
+      {Mgf mgf,
+      Hash hasher,
+      int saltLength = 0,
+      Random saltGenerator,
+      RsaSsaPssSigner signer}) {
+    signer ??= RsaSsaPssSigner(
+        mgf: mgf,
+        hasher: hasher,
+        saltLength: saltLength,
+        saltGenerator: saltGenerator);
+    return signer.signToBytes(this, msg);
+  }
+
+  String signPss(final /* String | List<int> | BigInt */ msg,
+      {Mgf mgf,
+      Hash hasher,
+      int saltLength = 0,
+      Random saltGenerator,
+      RsaSsaPssSigner signer}) {
+    signer ??= RsaSsaPssSigner(
+        mgf: mgf,
+        hasher: hasher,
+        saltLength: saltLength,
+        saltGenerator: saltGenerator);
+    return signer.sign(this, msg);
   }
 
   RSAPublicKey get toPublicKey => RSAPublicKey(n, e);

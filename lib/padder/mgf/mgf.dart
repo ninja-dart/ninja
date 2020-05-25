@@ -42,3 +42,5 @@ class Mgf1 implements Mgf {
 }
 
 final mgf1Sha1 = Mgf1(hasher: crypto.sha1);
+
+final mgf1Sha256 = Mgf1(hasher: crypto.sha256);
