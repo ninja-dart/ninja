@@ -24,7 +24,8 @@ void main() {
       final signer = RsaSsaPssSigner(saltLength: 10);
       final signature = signer.sign(privateKey, messageAbcd,
           salt: base64Decode('Br7j7BXOigzA4A=='));
-      expect(signature, 'ryq2OCyestd7yDKCjZ8wTL6xXf5DKuyuT2HWdz28uIpt2wz8sjPcAj0TuzOskE6HC938iMbn9jFS30Lwr9BN9A==');
+      expect(signature,
+          'ryq2OCyestd7yDKCjZ8wTL6xXf5DKuyuT2HWdz28uIpt2wz8sjPcAj0TuzOskE6HC938iMbn9jFS30Lwr9BN9A==');
     });
 
     test('sign.openssl', () async {
@@ -33,7 +34,7 @@ void main() {
 
       expect(
           await verifyRsaPss(publicKey.toPem(), signature, messageAbcd,
-              saltLength: 10, cleanupTempDirectory: false),
+              saltLength: 10),
           true);
     });
 
