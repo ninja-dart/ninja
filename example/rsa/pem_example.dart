@@ -1,4 +1,3 @@
-
 import 'package:ninja/ninja.dart';
 
 final publicKeyPkcs1 = '''

@@ -1,7 +1,7 @@
 import 'dart:typed_data';
 
 import 'package:crypto/crypto.dart' as crypto;
-import 'package:ninja/formats/asn1/asn1.dart';
+import 'package:ninja_asn1/ninja_asn1.dart';
 
 class EmsaHasher {
   final Uint8List asn1ObjectId;
@@ -48,7 +48,7 @@ class EmsaHasher {
 }
 
 /// Implements https://tools.ietf.org/html/rfc3447#section-9.2 specification.
-List<int> emsaPkcs1V15Encode(List<int> msg, int outLength, EmsaHasher hasher) {
+List<int> emsaPkcs1v15Encode(List<int> msg, int outLength, EmsaHasher hasher) {
   final hashed = hasher.hash(msg);
 
   final asn1 = ASN1Sequence([

@@ -17,9 +17,9 @@ main() {
       BigInt.parse(
           "143028293421514654659358549214971921584534096938352096320458818956414890934365483375293202045679474764569937266017713262196941957149321696805368542065644090886347646782188634885321277533175667840285448510687854061424867903968633218073060468434469761149335255007464091258725753837522484082998329871306803923137"));
 
-  String encoded = pubKey
-      .encrypt('Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
+  String encoded = pubKey.encryptToBase64(
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
   print(encoded);
-  String decoded = privKey.decrypt(encoded);
+  String decoded = privKey.decryptAsUtf8(encoded);
   print(decoded);
 }

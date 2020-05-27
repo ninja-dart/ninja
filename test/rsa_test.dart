@@ -1,6 +1,4 @@
-import 'dart:math';
-
-import 'package:ninja/asymmetric/rsa/rsa.dart';
+import 'package:ninja/ninja.dart';
 import 'package:test/test.dart';
 
 void main() {

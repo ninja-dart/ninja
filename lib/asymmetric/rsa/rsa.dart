@@ -7,14 +7,14 @@ import 'package:ninja/asymmetric/rsa/signer/emsa_pss.dart';
 import 'package:ninja/padder/mgf/mgf.dart';
 import 'package:ninja_prime/ninja_prime.dart';
 
-import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1V15.dart';
+import 'package:ninja/asymmetric/rsa/encoder/emsaPkcs1v15.dart';
 import 'package:ninja/asymmetric/rsa/engine/decrypter.dart';
 import 'package:ninja/asymmetric/rsa/engine/encrypter.dart';
 import 'package:ninja/asymmetric/rsa/signer/rsassa_pks1_v15.dart';
-import 'package:ninja/formats/asn1/asn1.dart';
-import 'package:ninja/formats/pem/pem.dart';
+import 'package:ninja_asn1/ninja_asn1.dart';
+import 'package:ninja_pem/ninja_pem.dart';
 import 'package:ninja/ninja.dart';
-import 'package:ninja/utils/hex_string.dart';
+import 'package:ninja_hex/ninja_hex.dart';
 
 export 'signer/signer.dart';
 
@@ -101,8 +101,7 @@ class RSAPublicKey {
 
   int get bitSize => n.bitLength;
 
-  Iterable<int> encryptToBytes(/* String | Iterable<int> */ input,
-      {Padder padder}) {
+  Iterable<int> encrypt(/* String | Iterable<int> */ input, {Padder padder}) {
     Iterable<int> inputBytes;
     if (input is String) {
       inputBytes = utf8.encode(input);
@@ -117,36 +116,38 @@ class RSAPublicKey {
     return engine.process(inputBytes);
   }
 
-  String encrypt(/* String | Iterable<int> */ input, {Padder padder}) {
-    final bytes = encryptToBytes(input, padder: padder);
+  String encryptToBase64(/* String | Iterable<int> */ input, {Padder padder}) {
+    final bytes = encrypt(input, padder: padder);
     return base64Encode(bytes);
   }
 
   String encryptToHex(/* String | Iterable<int> */ input, {Padder padder}) {
-    return hexEncode(encryptToBytes(input, padder: padder));
+    return hexEncode(encrypt(input, padder: padder));
   }
 
-  Iterable<int> encryptPkcsToBytes(/* String | Iterable<int> */ input,
+  Iterable<int> encryptPkcs1v15(/* String | Iterable<int> */ input,
       {Random rand}) {
-    return encryptToBytes(input, padder: EmePkcs1V15Encoder(rand: rand));
+    return encrypt(input, padder: EmePkcs1v15Encoder(rand: rand));
   }
 
-  String encryptPkcs(/* String | Iterable<int> */ input, {Random rand}) {
-    return encrypt(input, padder: EmePkcs1V15Encoder(rand: rand));
+  String encryptPkcs1v15ToBase64(/* String | Iterable<int> */ input,
+      {Random rand}) {
+    return encryptToBase64(input, padder: EmePkcs1v15Encoder(rand: rand));
   }
 
-  String encryptPkcsToHex(/* String | Iterable<int> */ input, {Random rand}) {
-    return encryptToHex(input, padder: EmePkcs1V15Encoder(rand: rand));
+  String encryptPkcs1v15ToHex(/* String | Iterable<int> */ input,
+      {Random rand}) {
+    return encryptToHex(input, padder: EmePkcs1v15Encoder(rand: rand));
   }
 
-  Iterable<int> encryptOaepToBytes(/* String | Iterable<int> */ input,
+  Iterable<int> encryptOaep(/* String | Iterable<int> */ input,
       {OAEPPadder oaepPadder}) {
-    return encryptToBytes(input, padder: oaepPadder ?? oaepPadder);
+    return encrypt(input, padder: oaepPadder ?? oaepPadder);
   }
 
-  String encryptOaep(/* String | Iterable<int> */ input,
+  String encryptOaepToBase64(/* String | Iterable<int> */ input,
       {OAEPPadder oaepPadder}) {
-    return encrypt(input, padder: oaepPadder ?? sha1OaepPadder);
+    return encryptToBase64(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   String encryptOaepToHex(/* String | Iterable<int> */ input,
@@ -154,10 +155,10 @@ class RSAPublicKey {
     return encryptToHex(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
-  bool verifySsaPkcs1V15(/* String | List<int> | BigInt */ signature,
+  bool verifySsaPkcs1v15(/* String | List<int> | BigInt */ signature,
       final /* String | List<int> | BigInt */ msg,
       {EmsaHasher hasher}) {
-    return RsassaPkcs1V15Verifier(hasher: hasher).verify(this, signature, msg);
+    return RsassaPkcs1v15Verifier(hasher: hasher).verify(this, signature, msg);
   }
 
   bool verifySsaPss(/* String | List<int> | BigInt */ signature,
@@ -197,6 +198,17 @@ class RSAPublicKey {
 class RSAPrivateKey {
   RSAPrivateKey(this.n, this.e, this.d, this.p, this.q) {
     _engine = RSADecryptionEngine(this);
+  }
+
+  factory RSAPrivateKey.fromPrimaries(BigInt p, BigInt q,
+      {BigInt publicExponent}) {
+    publicExponent ??= BigInt.from(0x01001);
+
+    final n = p * q;
+
+    BigInt d = publicExponent.modInverse((p - BigInt.one) * (q - BigInt.one));
+
+    return RSAPrivateKey(n, publicExponent, d, p, q);
   }
 
   factory RSAPrivateKey.generate(int keySize, {BigInt publicExponent}) {
@@ -245,9 +257,7 @@ class RSAPrivateKey {
         q = tmp;
       }
 
-      BigInt d = publicExponent.modInverse((p - BigInt.one) * (q - BigInt.one));
-
-      return RSAPrivateKey(n, publicExponent, d, p, q);
+      return RSAPrivateKey.fromPrimaries(p, q, publicExponent: publicExponent);
     }
   }
 
@@ -334,7 +344,7 @@ class RSAPrivateKey {
 
   int get bitSize => n.bitLength;
 
-  Iterable<int> decryptToBytes(/* String | List<int> */ input,
+  Iterable<int> decrypt(/* String | List<int> */ input,
       {Padder padder, bool raw = false}) {
     Uint8List inputBytes;
     if (input is String) {
@@ -353,54 +363,40 @@ class RSAPrivateKey {
     return padder.unpad(blockSize, unpadded);
   }
 
-  String decrypt(/* String | List<int> */ input,
+  String decryptAsUtf8(/* String | List<int> */ input,
       {Padder padder, bool raw = false}) {
-    return utf8
-        .decode(decryptToBytes(input, padder: padder, raw: raw).toList());
+    return utf8.decode(decrypt(input, padder: padder, raw: raw).toList());
   }
 
-  Iterable<int> decryptPkcsToBytes(/* String | List<int> */ input) {
-    return decryptToBytes(input, padder: EmePkcs1V15Encoder());
+  Iterable<int> decryptPkcs1v15(/* String | List<int> */ input) {
+    return decrypt(input, padder: EmePkcs1v15Encoder());
   }
 
-  String decryptPkcs(/* String | List<int> */ input) {
-    return decrypt(input, padder: EmePkcs1V15Encoder());
+  String decryptPkcs1v15AsUtf8(/* String | List<int> */ input) {
+    return decryptAsUtf8(input, padder: EmePkcs1v15Encoder());
   }
 
-  Iterable<int> decryptOaepToBytes(/* String | List<int> */ input,
+  Iterable<int> decryptOaep(/* String | List<int> */ input,
       {OAEPPadder oaepPadder}) {
-    return decryptToBytes(input, padder: oaepPadder ?? sha1OaepPadder);
-  }
-
-  String decryptOaep(/* String | List<int> */ input, {OAEPPadder oaepPadder}) {
     return decrypt(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
-  List<int> signSsaPkcs1V15ToBytes(final /* String | List<int> | BigInt */ msg,
+  String decryptOaepAsUtf8(/* String | List<int> */ input,
+      {OAEPPadder oaepPadder}) {
+    return decryptAsUtf8(input, padder: oaepPadder ?? sha1OaepPadder);
+  }
+
+  List<int> signSsaPkcs1v15(final /* String | List<int> | BigInt */ msg,
       {EmsaHasher hasher}) {
-    return RsassaPkcs1V15Signer(hasher: hasher).signToBytes(this, msg);
+    return RsassaPkcs1v15Signer(hasher: hasher).sign(this, msg);
   }
 
-  String signSsaPkcs1V15(/* String | List<int> | BigInt */ msg,
+  String signSsaPkcs1v15ToBase64(/* String | List<int> | BigInt */ msg,
       {EmsaHasher hasher}) {
-    return RsassaPkcs1V15Signer(hasher: hasher).sign(this, msg);
+    return RsassaPkcs1v15Signer(hasher: hasher).signToBase64(this, msg);
   }
 
-  Iterable<int> signPssToBytes(final /* String | List<int> | BigInt */ msg,
-      {Mgf mgf,
-      Hash hasher,
-      int saltLength = 0,
-      Random saltGenerator,
-      RsaSsaPssSigner signer}) {
-    signer ??= RsaSsaPssSigner(
-        mgf: mgf,
-        hasher: hasher,
-        saltLength: saltLength,
-        saltGenerator: saltGenerator);
-    return signer.signToBytes(this, msg);
-  }
-
-  String signPss(final /* String | List<int> | BigInt */ msg,
+  Iterable<int> signPss(final /* String | List<int> | BigInt */ msg,
       {Mgf mgf,
       Hash hasher,
       int saltLength = 0,
@@ -412,6 +408,20 @@ class RSAPrivateKey {
         saltLength: saltLength,
         saltGenerator: saltGenerator);
     return signer.sign(this, msg);
+  }
+
+  String signPssToBase64(final /* String | List<int> | BigInt */ msg,
+      {Mgf mgf,
+      Hash hasher,
+      int saltLength = 0,
+      Random saltGenerator,
+      RsaSsaPssSigner signer}) {
+    signer ??= RsaSsaPssSigner(
+        mgf: mgf,
+        hasher: hasher,
+        saltLength: saltLength,
+        saltGenerator: saltGenerator);
+    return signer.signToBase64(this, msg);
   }
 
   RSAPublicKey get toPublicKey => RSAPublicKey(n, e);

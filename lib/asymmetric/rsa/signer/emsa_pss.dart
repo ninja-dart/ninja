@@ -25,8 +25,7 @@ class RsaSsaPssSigner implements RsaSigner {
         hasher = hasher ?? sha256,
         saltGenerator = saltGenerator ?? Random.secure();
 
-  List<int> signToBytes(
-      RSAPrivateKey key, /* String | List<int> | BigInt */ msg,
+  List<int> sign(RSAPrivateKey key, /* String | List<int> | BigInt */ msg,
       {List<int> salt}) {
     int blockSize = key.blockSize;
     int emBits = key.bitSize - 1;
@@ -55,11 +54,11 @@ class RsaSsaPssSigner implements RsaSigner {
       throw Exception('encoding error. blockSize too small');
     }
 
-    if(salt == null) {
+    if (salt == null) {
       salt =
-      List<int>.generate(saltLength, (index) => saltGenerator.nextInt(256));
+          List<int>.generate(saltLength, (index) => saltGenerator.nextInt(256));
     } else {
-      if(salt.length != saltLength) {
+      if (salt.length != saltLength) {
         throw Exception('invalid salt. must be of length $saltLength');
       }
     }
@@ -103,9 +102,9 @@ class RsaSsaPssSigner implements RsaSigner {
     return key.engine.signBlock(em);
   }
 
-  String sign(RSAPrivateKey key, /* String | List<int> | BigInt */ msg,
+  String signToBase64(RSAPrivateKey key, /* String | List<int> | BigInt */ msg,
       {List<int> salt}) {
-    final bytes = signToBytes(key, msg, salt: salt);
+    final bytes = sign(key, msg, salt: salt);
     return base64Encode(bytes);
   }
 }

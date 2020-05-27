@@ -3,8 +3,6 @@
 
 library ninja.ufixnum;
 
-import "dart:typed_data";
-
 const _MASK_3 = 0x07;
 const _MASK_5 = 0x1F;
 const _MASK_6 = 0x3F;

@@ -1,4 +1,5 @@
 import 'package:ninja/ninja.dart';
+import 'package:ninja_hex/ninja_hex.dart';
 import 'package:test/test.dart';
 
 void main() {

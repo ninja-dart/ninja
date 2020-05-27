@@ -14,7 +14,7 @@ void main() {
 
     test('sign&verify', () {
       final signer = RsaSsaPssSigner(saltLength: 10);
-      final signature = signer.sign(privateKey, messageAbcd);
+      final signature = signer.signToBase64(privateKey, messageAbcd);
 
       final verifier = RsaSsaPssVerifier(saltLength: 10);
       expect(verifier.verify(publicKey, signature, messageAbcd), true);
@@ -22,7 +22,7 @@ void main() {
 
     test('sign.withSalt', () {
       final signer = RsaSsaPssSigner(saltLength: 10);
-      final signature = signer.sign(privateKey, messageAbcd,
+      final signature = signer.signToBase64(privateKey, messageAbcd,
           salt: base64Decode('Br7j7BXOigzA4A=='));
       expect(signature,
           'ryq2OCyestd7yDKCjZ8wTL6xXf5DKuyuT2HWdz28uIpt2wz8sjPcAj0TuzOskE6HC938iMbn9jFS30Lwr9BN9A==');
@@ -30,7 +30,7 @@ void main() {
 
     test('sign.openssl', () async {
       final signer = RsaSsaPssSigner(saltLength: 10);
-      final signature = signer.sign(privateKey, messageAbcd);
+      final signature = signer.signToBase64(privateKey, messageAbcd);
 
       expect(
           await verifyRsaPss(publicKey.toPem(), signature, messageAbcd,

@@ -19,7 +19,7 @@ abstract class ListOps {
     return ret;
   }
 
-  static Uint8List xorToByteData(ByteData a, Iterable<int> b) {
+  static void xorToByteData(ByteData a, Iterable<int> b) {
     if (a.lengthInBytes != b.length) {
       throw Exception('Lengths of a and b do not match');
     }

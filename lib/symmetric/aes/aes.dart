@@ -3,8 +3,11 @@ import 'dart:typed_data';
 
 import 'package:ninja/block_cipher/modes/cbc.dart';
 import 'package:ninja/ninja.dart';
+import 'package:ninja_hex/ninja_hex.dart';
 
 import 'engine.dart';
+
+export 'engine.dart';
 
 class AESKey {
   final Uint8List keyBytes;

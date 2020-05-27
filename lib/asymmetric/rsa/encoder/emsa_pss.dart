@@ -17,9 +17,7 @@ class EmsaPssEncoder {
         hasher = hasher ?? sha1;
 
   Uint8List encode(int blockSize, List<int> input) {
-    final mHash = hasher
-        .convert(input)
-        .bytes;
+    final mHash = hasher.convert(input).bytes;
 
     if (blockSize < mHash.length + saltLength + 2) {
       throw Exception('encoding error. blockSize too small');
@@ -35,9 +33,7 @@ class EmsaPssEncoder {
       ...salt,
     ];
 
-    final h = hasher
-        .convert(mDash)
-        .bytes;
+    final h = hasher.convert(mDash).bytes;
 
     final ps = List.filled(blockSize - saltLength - mHash.length - 2, 0);
 

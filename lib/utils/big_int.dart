@@ -1,7 +1,7 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:ninja/ninja.dart';
+import 'package:ninja_hex/ninja_hex.dart';
 
 // This file has been copied and modified from pointy_castles package. See file
 // LICENSE/pointy_castle_LICENSE file for more information.

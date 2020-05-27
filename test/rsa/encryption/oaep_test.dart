@@ -13,15 +13,15 @@ void main() {
     final smallMsg = 'hello world!\n';
 
     test('smallmsg.encrypt&decrypt', () {
-      String encrypted = publicKey.encryptOaep(smallMsg);
+      String encrypted = publicKey.encryptOaepToBase64(smallMsg);
       print(encrypted);
-      String decrypted = privateKey.decryptOaep(encrypted);
+      String decrypted = privateKey.decryptOaepAsUtf8(encrypted);
 
       expect(decrypted, smallMsg);
     });
 
     test('smallmsg.encrypt.openssl', () async {
-      String encrypted = publicKey.encryptOaep(smallMsg);
+      String encrypted = publicKey.encryptOaepToBase64(smallMsg);
       print(encrypted);
 
       expect(
@@ -33,7 +33,7 @@ void main() {
     test('smallmsg.decrypt.constant', () {
       String encrypted =
           'WwOeW77CHGzwB76RgmDbpJuyRWAVJnz/b1Vzd4UQbt/BTl8PKuuLWjQYxkeA3NtV8zfSzzJVmkLlQafCr2RK+Q==';
-      final decoded = privateKey.decryptOaep(encrypted);
+      final decoded = privateKey.decryptOaepAsUtf8(encrypted);
       expect(decoded, smallMsg);
     });
 
@@ -41,16 +41,16 @@ void main() {
       final encrypted = await encryptRsaOaep(publicKey.toPem(), smallMsg,
           cleanupTempDirectory: false);
       print(base64Encode(encrypted));
-      String decrypted = privateKey.decryptOaep(encrypted);
+      String decrypted = privateKey.decryptOaepAsUtf8(encrypted);
       expect(decrypted, smallMsg);
     });
 
     test('long_msg_endecrypt', () {
       final message =
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...';
-      String encrypted = publicKey.encryptOaep(message);
+      String encrypted = publicKey.encryptOaepToBase64(message);
       print(encrypted);
-      String decrypted = privateKey.decryptOaep(encrypted);
+      String decrypted = privateKey.decryptOaepAsUtf8(encrypted);
 
       expect(decrypted, message);
     });
