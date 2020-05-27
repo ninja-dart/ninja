@@ -65,7 +65,9 @@ class RSAEncryptionEngine {
     }
 
     BigInt res = bytesToBigInt(input);
-    if (res >= key.n) throw ArgumentError("Input too large for RSA cipher");
+    if (res >= key.n) {
+      throw ArgumentError("Input too large for RSA cipher");
+    }
 
     return res;
   }

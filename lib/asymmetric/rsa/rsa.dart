@@ -118,7 +118,8 @@ class RSAPublicKey {
   }
 
   String encrypt(/* String | Iterable<int> */ input, {Padder padder}) {
-    return base64Encode(encryptToBytes(input, padder: padder));
+    final bytes = encryptToBytes(input, padder: padder);
+    return base64Encode(bytes);
   }
 
   String encryptToHex(/* String | Iterable<int> */ input, {Padder padder}) {
