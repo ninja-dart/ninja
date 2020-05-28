@@ -12,7 +12,7 @@ void main() {
       String encrypted = publicKey.encryptToBase64(message);
       expect(encrypted,
           'HqfFR+nuGx7Xf5kCkbTd1QSje7CYWeE3xDO8J+Ed8sW9ER/AN/s84OTZ8K+WSMNkh+P6CM3OiWgprRI+0a5jHg==');
-      String decrypted = privateKey.decryptAsUtf8(encrypted, raw: true);
+      String decrypted = privateKey.decryptToUtf8(encrypted, raw: true);
       expect(decrypted, message);
     });
 
@@ -22,7 +22,7 @@ void main() {
       String encrypted = publicKey.encryptToBase64(message);
       expect(encrypted,
           'UYr82kb5BJ3nm+i1JjE3ad6ni8Jz7CGAG0cENarXaum2a/CnfouejS4HaycXysouYi1U1vqydNFPd3D58rJXr53nRmyWmodn7n6D7EtFo+0T4sumbfyiU5HEhxBP0oi0+9o0w8dAFp1MFKCcfID2NlPD3zyt3fLPfyxXJZxaKlS2EuPuK/t5h2odMC6CVF3Fc/B2oIKOYQzXfAO85Qgwlmxoc5cwXfbQTctIf9P56tv4ZVdGWIQ+2tL/XTrjmKMHDBXImFzsiCdQZouS6tpHxqw5IMh82WcI5COKzDFBC5q5NC9ZgLbQXNnde4gZFls63uGpOLlC6Fgz4pK92YZ3vgu2cp+sL8PDw4rkjWF0X//T0UcSCiJa+rPfLYnEKj3TfVeyWVkpAVnAfYNs/3wov013e6SjhR6puYzTf7v5g3s=');
-      String decrypted = privateKey.decryptAsUtf8(encrypted, raw: true);
+      String decrypted = privateKey.decryptToUtf8(encrypted, raw: true);
       expect(decrypted, message);
     });
   });

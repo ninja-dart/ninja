@@ -1,88 +1,205 @@
 # ninja
 
-Encryption and Decryption cryptographic algorithms exposed as Dart's `Converter` and `Codec` interfaces.
-
-# AES
-
-AES is symmetric-key encryption algorithm. Class `AES` implements `Converter<String, String>` to encrypt and decrypt
-data. It expects a key. By default, `PKCS7Padded` is used for padding. This can be configured using `padder` parameter.
-
-## Encryption
-
-Use `encode` method to encode clear text.
-
-```dart
-main() {
-  final aes = AES.fromBytes(Uint8List.fromList(List.generate(16, (i) => i)));
-  String value = aes.encode('Dart');
-  print(value);
-}
-```
-
-## Decryption
-
-Use `decode` method to decode to clear text.
-
-```dart
-main() {
-  final aes = AES.fromBytes(Uint8List.fromList(List.generate(16, (i) => i)));
-  String decoded = aes.decode('3347391e8789852b5c1b6ff1d3c44d0c');
-  print(decoded);
-}
-```
+Cryptography dart library to encrypt, decrypt, sign and verify messages
 
 # RSA
 
-RSA is an asymmetric-key encryption algorithm. Class `RSA` implements `Converter<String, String>` to encrypt and decrypt
-data.
-
-It expects a key. If the key is `RSAPublicKey`, it can only encode. If the key is `RSAPrivateKey`, it can both encode 
-and decode.
-
 ## Encryption
 
+### OAEP
+
 ```dart
-final key = RSAPublicKey(
-  BigInt.parse(
-      "20620915813302906913761247666337410938401372343750709187749515126790853245302593205328533062154315527282056175455193812046134139935830222032257750866653461677566720508752544506266533943725970345491747964654489405936145559121373664620352701801574863309087932865304205561439525871868738640172656811470047745445089832193075388387376667722031640892525639171016297098395245887609359882693921643396724693523583076582208970794545581164952427577506035951122669158313095779596666008591745562008787129160302313244329988240795948461701615228062848622019620094307696506764461083870202605984497833670577046553861732258592935325691"),
-  BigInt.parse("65537"));
-String encrypted = pubKey
-  .encrypt('Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
-print(encrypted);
+void main() {
+  final privateKeyPem = '''
+-----BEGIN RSA PRIVATE KEY-----
+MIIBOwIBAAJBAMv7Reawnxr0DfYN3IZbb5ih/XJGeLWDv7WuhTlie//c2TDXw/mW
+914VFyoBfxQxAezSj8YpuADiTwqDZl13wKMCAwEAAQJAYaTrFT8/KpvhgwOnqPlk
+NmB0/psVdW6X+tSMGag3S4cFid3nLkN384N6tZ+na1VWNkLy32Ndpxo6pQq4NSAb
+YQIhAPNlJsV+Snpg+JftgviV5+jOKY03bx29GsZF+umN6hD/AiEA1ouXAO2mVGRk
+BuoGXe3o/d5AOXj41vTB8D6IUGu8bF0CIQC6zah7LRmGYYSKPk0l8w+hmxFDBAex
+IGE7SZxwwm2iCwIhAInnDbe2CbyjDrx2/oKvopxTmDqY7HHWvzX6K8pthZ6tAiAw
+w+DJoSx81QQpD8gY/BXjovadVtVROALaFFvdmN64sw==
+-----END RSA PRIVATE KEY-----''';
+
+  final privateKey = RSAPrivateKey.fromPEM(privateKeyPem);
+  final publicKey = privateKey.toPublicKey;
+
+  String encrypted = publicKey.encryptOaepToBase64(
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
+  print(encrypted);
+  String decrypted = privateKey.decryptOaepToUtf8(encrypted);
+  print(decrypted);
+}
 ```
 
-## Decryption
+### pkcs1v15
 
 ```dart
-final key = RSAPrivateKey(
-  BigInt.parse(
-      "20620915813302906913761247666337410938401372343750709187749515126790853245302593205328533062154315527282056175455193812046134139935830222032257750866653461677566720508752544506266533943725970345491747964654489405936145559121373664620352701801574863309087932865304205561439525871868738640172656811470047745445089832193075388387376667722031640892525639171016297098395245887609359882693921643396724693523583076582208970794545581164952427577506035951122669158313095779596666008591745562008787129160302313244329988240795948461701615228062848622019620094307696506764461083870202605984497833670577046553861732258592935325691"),
-  BigInt.parse("65537"),
-  BigInt.parse(
-      "11998058528661160053642124235359844880039079149364512302169225182946866898849176558365314596732660324493329967536772364327680348872134489319530228055102152992797567579226269544119435926913937183793755182388650533700918602627770886358900914370472445911502526145837923104029967812779021649252540542517598618021899291933220000807916271555680217608559770825469218984818060775562259820009637370696396889812317991880425127772801187664191059506258517954313903362361211485802288635947903604738301101038823790599295749578655834195416886345569976295245464597506584866355976650830539380175531900288933412328525689718517239330305"),
-  BigInt.parse(
-      "144173682842817587002196172066264549138375068078359231382946906898412792452632726597279520229873489736777248181678202636100459215718497240474064366927544074501134727745837254834206456400508719134610847814227274992298238973375146473350157304285346424982280927848339601514720098577525635486320547905945936448443"),
-  BigInt.parse(
-      "143028293421514654659358549214971921584534096938352096320458818956414890934365483375293202045679474764569937266017713262196941957149321696805368542065644090886347646782188634885321277533175667840285448510687854061424867903968633218073060468434469761149335255007464091258725753837522484082998329871306803923137"));
+main() {
+  final privateKeyPem = '''
+-----BEGIN RSA PRIVATE KEY-----
+MIIBOwIBAAJBAMv7Reawnxr0DfYN3IZbb5ih/XJGeLWDv7WuhTlie//c2TDXw/mW
+914VFyoBfxQxAezSj8YpuADiTwqDZl13wKMCAwEAAQJAYaTrFT8/KpvhgwOnqPlk
+NmB0/psVdW6X+tSMGag3S4cFid3nLkN384N6tZ+na1VWNkLy32Ndpxo6pQq4NSAb
+YQIhAPNlJsV+Snpg+JftgviV5+jOKY03bx29GsZF+umN6hD/AiEA1ouXAO2mVGRk
+BuoGXe3o/d5AOXj41vTB8D6IUGu8bF0CIQC6zah7LRmGYYSKPk0l8w+hmxFDBAex
+IGE7SZxwwm2iCwIhAInnDbe2CbyjDrx2/oKvopxTmDqY7HHWvzX6K8pthZ6tAiAw
+w+DJoSx81QQpD8gY/BXjovadVtVROALaFFvdmN64sw==
+-----END RSA PRIVATE KEY-----''';
 
-String decrypted = privKey.decrypt(encrypted);
-print(decrypted);
+  final privateKey = RSAPrivateKey.fromPEM(privateKeyPem);
+  final publicKey = privateKey.toPublicKey;
+
+  String encrypted = publicKey.encryptToBase64(
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
+  print(encrypted);
+  String decrypted = privateKey.decryptToUtf8(encrypted);
+  print(decrypted);
+}
+```
+
+## Signature
+
+### RSASSA-PSS
+
+```dart
+void main() {
+  final privateKeyPem = '''
+-----BEGIN RSA PRIVATE KEY-----
+MIIBOwIBAAJBAMv7Reawnxr0DfYN3IZbb5ih/XJGeLWDv7WuhTlie//c2TDXw/mW
+914VFyoBfxQxAezSj8YpuADiTwqDZl13wKMCAwEAAQJAYaTrFT8/KpvhgwOnqPlk
+NmB0/psVdW6X+tSMGag3S4cFid3nLkN384N6tZ+na1VWNkLy32Ndpxo6pQq4NSAb
+YQIhAPNlJsV+Snpg+JftgviV5+jOKY03bx29GsZF+umN6hD/AiEA1ouXAO2mVGRk
+BuoGXe3o/d5AOXj41vTB8D6IUGu8bF0CIQC6zah7LRmGYYSKPk0l8w+hmxFDBAex
+IGE7SZxwwm2iCwIhAInnDbe2CbyjDrx2/oKvopxTmDqY7HHWvzX6K8pthZ6tAiAw
+w+DJoSx81QQpD8gY/BXjovadVtVROALaFFvdmN64sw==
+-----END RSA PRIVATE KEY-----''';
+
+  final privateKey = RSAPrivateKey.fromPEM(privateKeyPem);
+  final publicKey = privateKey.toPublicKey;
+
+  final message = 'abcdefghijklmnopqrstuvwxyz\n';
+
+  final signature = privateKey.signPssToBase64(message);
+  print(signature);
+
+  print(publicKey.verifySsaPss(signature, message));
+
+  final verifier = RsaSsaPssVerifier(saltLength: 10);
+  print(verifier.extractSalt(publicKey, signature));
+}
+```
+
+### RSASSA-PKCS1-V1_5
+
+```dart
+void main() {
+  final privateKeyPem = '''
+-----BEGIN RSA PRIVATE KEY-----
+MIIBOwIBAAJBAMv7Reawnxr0DfYN3IZbb5ih/XJGeLWDv7WuhTlie//c2TDXw/mW
+914VFyoBfxQxAezSj8YpuADiTwqDZl13wKMCAwEAAQJAYaTrFT8/KpvhgwOnqPlk
+NmB0/psVdW6X+tSMGag3S4cFid3nLkN384N6tZ+na1VWNkLy32Ndpxo6pQq4NSAb
+YQIhAPNlJsV+Snpg+JftgviV5+jOKY03bx29GsZF+umN6hD/AiEA1ouXAO2mVGRk
+BuoGXe3o/d5AOXj41vTB8D6IUGu8bF0CIQC6zah7LRmGYYSKPk0l8w+hmxFDBAex
+IGE7SZxwwm2iCwIhAInnDbe2CbyjDrx2/oKvopxTmDqY7HHWvzX6K8pthZ6tAiAw
+w+DJoSx81QQpD8gY/BXjovadVtVROALaFFvdmN64sw==
+-----END RSA PRIVATE KEY-----''';
+
+  final privateKey = RSAPrivateKey.fromPEM(privateKeyPem);
+  final publicKey = privateKey.toPublicKey;
+
+  final message = 'abcdefghijklmnopqrstuvwxyz\n';
+
+  final signature = privateKey.signSsaPkcs1v15ToBase64(message);
+  print(signature);
+
+  print(publicKey.verifySsaPkcs1v15(signature, message));
+}
+```
+
+## Keys
+
+### Generate key
+
+```dart
+void main() {
+  final privateKey = RSAPrivateKey.generate(1024);
+  print(privateKey.p);
+  print(privateKey.q);
+  print(privateKey.n.bitLength);
+}
 ```
 
 ## Load key from PEM
 
-> TODO
+```dart
+final publicKeyPkcs1 = '''
+-----BEGIN RSA PUBLIC KEY-----
+MEgCQQDL+0XmsJ8a9A32DdyGW2+Yof1yRni1g7+1roU5Ynv/3Nkw18P5lvdeFRcq
+AX8UMQHs0o/GKbgA4k8Kg2Zdd8CjAgMBAAE=
+-----END RSA PUBLIC KEY-----''';
 
-## Load key from ASN1
+final publicKeyPkcs8 = '''
+-----BEGIN PUBLIC KEY-----
+MFwwDQYJKoZIhvcNAQEBBQADSwAwSAJBAMv7Reawnxr0DfYN3IZbb5ih/XJGeLWD
+v7WuhTlie//c2TDXw/mW914VFyoBfxQxAezSj8YpuADiTwqDZl13wKMCAwEAAQ==
+-----END PUBLIC KEY-----''';
 
-> TODO
+final privateKeyPkcs1 = '''
+-----BEGIN RSA PRIVATE KEY-----
+MIIBOwIBAAJBAMv7Reawnxr0DfYN3IZbb5ih/XJGeLWDv7WuhTlie//c2TDXw/mW
+914VFyoBfxQxAezSj8YpuADiTwqDZl13wKMCAwEAAQJAYaTrFT8/KpvhgwOnqPlk
+NmB0/psVdW6X+tSMGag3S4cFid3nLkN384N6tZ+na1VWNkLy32Ndpxo6pQq4NSAb
+YQIhAPNlJsV+Snpg+JftgviV5+jOKY03bx29GsZF+umN6hD/AiEA1ouXAO2mVGRk
+BuoGXe3o/d5AOXj41vTB8D6IUGu8bF0CIQC6zah7LRmGYYSKPk0l8w+hmxFDBAex
+IGE7SZxwwm2iCwIhAInnDbe2CbyjDrx2/oKvopxTmDqY7HHWvzX6K8pthZ6tAiAw
+w+DJoSx81QQpD8gY/BXjovadVtVROALaFFvdmN64sw==
+-----END RSA PRIVATE KEY-----''';
 
+final privateKeyPkcs8 = '''
+-----BEGIN PRIVATE KEY-----
+MIIBVQIBADANBgkqhkiG9w0BAQEFAASCAT8wggE7AgEAAkEAy/tF5rCfGvQN9g3c
+hltvmKH9ckZ4tYO/ta6FOWJ7/9zZMNfD+Zb3XhUXKgF/FDEB7NKPxim4AOJPCoNm
+XXfAowIDAQABAkBhpOsVPz8qm+GDA6eo+WQ2YHT+mxV1bpf61IwZqDdLhwWJ3ecu
+Q3fzg3q1n6drVVY2QvLfY12nGjqlCrg1IBthAiEA82UmxX5KemD4l+2C+JXn6M4p
+jTdvHb0axkX66Y3qEP8CIQDWi5cA7aZUZGQG6gZd7ej93kA5ePjW9MHwPohQa7xs
+XQIhALrNqHstGYZhhIo+TSXzD6GbEUMEB7EgYTtJnHDCbaILAiEAiecNt7YJvKMO
+vHb+gq+inFOYOpjscda/Nforym2Fnq0CIDDD4MmhLHzVBCkPyBj8FeOi9p1W1VE4
+AtoUW92Y3riz
+-----END PRIVATE KEY-----''';
+
+void pkcs1() {
+  final publicKey = RSAPublicKey.fromPEM(publicKeyPkcs1);
+  print(publicKey.toPem(toPkcs1: true));
+  final privateKey = RSAPrivateKey.fromPEM(privateKeyPkcs1);
+  print(privateKey.toPem());
+  print(privateKey.toPem(toPkcs1: false));
+}
+
+void pkcs8() {
+  final publicKey = RSAPublicKey.fromPEM(publicKeyPkcs8);
+  print(publicKey.toPem());
+  final privateKey = RSAPrivateKey.fromPEM(privateKeyPkcs8);
+  print(privateKey.toPem(toPkcs1: false));
+}
+```
+
+# AES
+
+## Encryption
+
+```dart
+main() {
+  final aes = AESKey(Uint8List.fromList(List.generate(16, (i) => i)));
+  String encoded = aes.encryptToBase64('Dart');
+  print(encoded);
+  String decoded = aes.decryptToUtf8(encoded);
+  print(decoded);
+}
+```
 
 # TODO
 
-+ [ ] RSA OAEP
-+ [ ] RSASSA-PSS
-+ [ ] RSA key generation
 + [ ] AES key derivation
 + [ ] More block cipher modes
-+ [ ] PEM parser
++ [ ] Curve based cryptography

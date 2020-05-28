@@ -1,5 +1,7 @@
 import 'dart:typed_data';
 
+export 'modes/cbc.dart';
+
 abstract class BlockCipher {
   int get blockSize;
 

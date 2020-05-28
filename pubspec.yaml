@@ -1,7 +1,7 @@
 name: ninja
-description: Encryption and Decryption cryptographic algorithms exposed as Dart's Converter and Codec interfaces.
-version: 2.0.1
-homepage: https://github.com/Jaguar-dart/ninja
+description: Cryptography dart library to encrypt, decrypt, sign and verify messages
+version: 3.0.0
+homepage: https://github.com/ninja-dart/ninja
 author: Ravi Teja Gudapati <tejainece@gmail.com>
 
 environment:
@@ -13,9 +13,9 @@ dependencies:
   ninja_pem: ^1.0.0
   ninja_asn1: ^1.0.0
   ninja_hex: ^1.0.0
+  collection: ^1.14.12
 
 dev_dependencies:
   test: ^1.3.0
   pedantic:
-  ninja_openssl:
-    path: ../ninja_openssl
+  ninja_openssl: ^1.0.4

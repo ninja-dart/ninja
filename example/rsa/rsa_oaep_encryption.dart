@@ -1,5 +1,4 @@
-import 'package:ninja/asymmetric/rsa/rsa.dart';
-import 'package:ninja/asymmetric/rsa/signer/emsa_pss.dart';
+import 'package:ninja/ninja.dart';
 
 void main() {
   final privateKeyPem = '''
@@ -16,13 +15,9 @@ w+DJoSx81QQpD8gY/BXjovadVtVROALaFFvdmN64sw==
   final privateKey = RSAPrivateKey.fromPEM(privateKeyPem);
   final publicKey = privateKey.toPublicKey;
 
-  final message = 'abcdefghijklmnopqrstuvwxyz\n';
-
-  final signature = privateKey.signPssToBase64(message);
-  print(signature);
-
-  print(publicKey.verifySsaPss(signature, message));
-
-  final verifier = RsaSsaPssVerifier(saltLength: 10);
-  print(verifier.extractSalt(publicKey, signature));
+  String encrypted = publicKey.encryptOaepToBase64(
+      'Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
+  print(encrypted);
+  String decrypted = privateKey.decryptOaepToUtf8(encrypted);
+  print(decrypted);
 }

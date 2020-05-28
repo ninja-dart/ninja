@@ -18,11 +18,8 @@ w+DJoSx81QQpD8gY/BXjovadVtVROALaFFvdmN64sw==
 
   final message = 'abcdefghijklmnopqrstuvwxyz\n';
 
-  final signature = privateKey.signPssToBase64(message);
+  final signature = privateKey.signSsaPkcs1v15ToBase64(message);
   print(signature);
 
-  print(publicKey.verifySsaPss(signature, message));
-
-  final verifier = RsaSsaPssVerifier(saltLength: 10);
-  print(verifier.extractSalt(publicKey, signature));
+  print(publicKey.verifySsaPkcs1v15(signature, message));
 }

@@ -18,7 +18,7 @@ void main() {
     test('smallMsg.encrypt&decrypt', () {
       String encrypted = publicKey.encryptPkcs1v15ToBase64(smallMsg);
       print(publicKey.encryptPkcs1v15ToBase64(smallMsg));
-      String decrypted = privateKey.decryptPkcs1v15AsUtf8(encrypted);
+      String decrypted = privateKey.decryptPkcs1v15ToUtf8(encrypted);
 
       expect(decrypted, smallMsg);
     });
@@ -26,13 +26,13 @@ void main() {
     test('smallMsg.dencrypt.constant', () {
       final encrypted = hexDecode(
           '253D6BCFBE654D5B07179719ECB250218AFEBCF555FD6CC56C3C64838BE719B44484C7916106B81C722AF245886172A5233B44234B36E61186CA77E513404514');
-      final decoded = privateKey.decryptPkcs1v15AsUtf8(encrypted);
+      final decoded = privateKey.decryptPkcs1v15ToUtf8(encrypted);
       expect(decoded, smallMsg);
     });
 
     test('smallMsg.dencrypt.openssl', () async {
       final encrypted = await encryptRsaPkcs1v15(publicKey.toPem(), smallMsg);
-      final decoded = privateKey.decryptPkcs1v15AsUtf8(encrypted);
+      final decoded = privateKey.decryptPkcs1v15ToUtf8(encrypted);
       expect(decoded, smallMsg);
     });
 
@@ -47,7 +47,7 @@ void main() {
     test('longMsg.encrypt&decrypt', () {
       String encrypted = publicKey.encryptPkcs1v15ToBase64(longMsg);
       print(publicKey.encryptPkcs1v15ToBase64(longMsg));
-      String decrypted = privateKey.decryptPkcs1v15AsUtf8(encrypted);
+      String decrypted = privateKey.decryptPkcs1v15ToUtf8(encrypted);
 
       expect(decrypted, longMsg);
     });

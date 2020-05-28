@@ -20,6 +20,6 @@ main() {
   String encoded = pubKey.encryptToBase64(
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
   print(encoded);
-  String decoded = privKey.decryptAsUtf8(encoded);
+  String decoded = privKey.decryptToUtf8(encoded);
   print(decoded);
 }

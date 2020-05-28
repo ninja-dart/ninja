@@ -1,3 +1,11 @@
+## 3.0.0
+
++ Simpler and elegant API
++ OAEP encryption
++ PKCS1V15 encryption
++ RSASSA-PSS sign
++ RSASSA-PKCS1-V1_5 sign 
+
 ## 2.0.1
 
 + Pub publish fixes

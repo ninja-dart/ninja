@@ -7,7 +7,7 @@ final publicKey = privateKey.toPublicKey;
 void short() {
   String encrypted = publicKey.encryptToBase64('hello world!');
   print(encrypted);
-  String decrypted = privateKey.decryptAsUtf8(encrypted);
+  String decrypted = privateKey.decryptToUtf8(encrypted);
   print(decrypted);
 }
 
@@ -15,7 +15,7 @@ void long() {
   String encrypted = publicKey.encryptToBase64(
       'Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...');
   print(encrypted);
-  String decrypted = privateKey.decryptAsUtf8(encrypted);
+  String decrypted = privateKey.decryptToUtf8(encrypted);
   print(decrypted);
 }
 

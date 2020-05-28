@@ -163,7 +163,7 @@ class RSAPublicKey {
 
   bool verifySsaPss(/* String | List<int> | BigInt */ signature,
       final /* String | List<int> | BigInt */ msg,
-      {Mgf mgf, Hash hasher, int saltLength = 0, RsaSsaPssVerifier verifier}) {
+      {Mgf mgf, Hash hasher, int saltLength = 10, RsaSsaPssVerifier verifier}) {
     verifier ??=
         RsaSsaPssVerifier(mgf: mgf, hasher: hasher, saltLength: saltLength);
     return verifier.verify(this, signature, msg);
@@ -363,7 +363,7 @@ class RSAPrivateKey {
     return padder.unpad(blockSize, unpadded);
   }
 
-  String decryptAsUtf8(/* String | List<int> */ input,
+  String decryptToUtf8(/* String | List<int> */ input,
       {Padder padder, bool raw = false}) {
     return utf8.decode(decrypt(input, padder: padder, raw: raw).toList());
   }
@@ -372,8 +372,8 @@ class RSAPrivateKey {
     return decrypt(input, padder: EmePkcs1v15Encoder());
   }
 
-  String decryptPkcs1v15AsUtf8(/* String | List<int> */ input) {
-    return decryptAsUtf8(input, padder: EmePkcs1v15Encoder());
+  String decryptPkcs1v15ToUtf8(/* String | List<int> */ input) {
+    return decryptToUtf8(input, padder: EmePkcs1v15Encoder());
   }
 
   Iterable<int> decryptOaep(/* String | List<int> */ input,
@@ -381,9 +381,9 @@ class RSAPrivateKey {
     return decrypt(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
-  String decryptOaepAsUtf8(/* String | List<int> */ input,
+  String decryptOaepToUtf8(/* String | List<int> */ input,
       {OAEPPadder oaepPadder}) {
-    return decryptAsUtf8(input, padder: oaepPadder ?? sha1OaepPadder);
+    return decryptToUtf8(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   List<int> signSsaPkcs1v15(final /* String | List<int> | BigInt */ msg,
@@ -399,7 +399,7 @@ class RSAPrivateKey {
   Iterable<int> signPss(final /* String | List<int> | BigInt */ msg,
       {Mgf mgf,
       Hash hasher,
-      int saltLength = 0,
+      int saltLength = 10,
       Random saltGenerator,
       RsaSsaPssSigner signer}) {
     signer ??= RsaSsaPssSigner(
@@ -413,7 +413,7 @@ class RSAPrivateKey {
   String signPssToBase64(final /* String | List<int> | BigInt */ msg,
       {Mgf mgf,
       Hash hasher,
-      int saltLength = 0,
+      int saltLength = 10,
       Random saltGenerator,
       RsaSsaPssSigner signer}) {
     signer ??= RsaSsaPssSigner(

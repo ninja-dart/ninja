@@ -15,7 +15,7 @@ void main() {
     test('smallmsg.encrypt&decrypt', () {
       String encrypted = publicKey.encryptOaepToBase64(smallMsg);
       print(encrypted);
-      String decrypted = privateKey.decryptOaepAsUtf8(encrypted);
+      String decrypted = privateKey.decryptOaepToUtf8(encrypted);
 
       expect(decrypted, smallMsg);
     });
@@ -33,7 +33,7 @@ void main() {
     test('smallmsg.decrypt.constant', () {
       String encrypted =
           'WwOeW77CHGzwB76RgmDbpJuyRWAVJnz/b1Vzd4UQbt/BTl8PKuuLWjQYxkeA3NtV8zfSzzJVmkLlQafCr2RK+Q==';
-      final decoded = privateKey.decryptOaepAsUtf8(encrypted);
+      final decoded = privateKey.decryptOaepToUtf8(encrypted);
       expect(decoded, smallMsg);
     });
 
@@ -41,7 +41,7 @@ void main() {
       final encrypted = await encryptRsaOaep(publicKey.toPem(), smallMsg,
           cleanupTempDirectory: false);
       print(base64Encode(encrypted));
-      String decrypted = privateKey.decryptOaepAsUtf8(encrypted);
+      String decrypted = privateKey.decryptOaepToUtf8(encrypted);
       expect(decrypted, smallMsg);
     });
 
@@ -50,7 +50,7 @@ void main() {
           'Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...Lorem ipsum dolor sit amet, consectetur adipiscing elit...';
       String encrypted = publicKey.encryptOaepToBase64(message);
       print(encrypted);
-      String decrypted = privateKey.decryptOaepAsUtf8(encrypted);
+      String decrypted = privateKey.decryptOaepToUtf8(encrypted);
 
       expect(decrypted, message);
     });
