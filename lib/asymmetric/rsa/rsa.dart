@@ -142,7 +142,7 @@ class RSAPublicKey {
 
   Iterable<int> encryptOaep(/* String | Iterable<int> */ input,
       {OAEPPadder oaepPadder}) {
-    return encrypt(input, padder: oaepPadder ?? oaepPadder);
+    return encrypt(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   String encryptOaepToBase64(/* String | Iterable<int> */ input,
