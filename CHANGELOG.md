@@ -1,3 +1,7 @@
+## 3.0.1
+
++ Fixed typo bug for default oaepPadder for RSAPublicKey.encryptOaep method
+
 ## 3.0.0
 
 + Simpler and elegant API
