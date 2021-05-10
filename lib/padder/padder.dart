@@ -24,7 +24,7 @@ class NopPadder implements Padder {
       throw Exception('Input length must be multiple of blockSize: $blockSize');
     }
 
-    return Uint8List.fromList(input);
+    return Uint8List.fromList(input.toList());
   }
 
   Iterable<int> unpad(int blockSize, Iterable<int> input) {

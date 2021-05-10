@@ -10,7 +10,7 @@ abstract class Mgf {
 class Mgf1 implements Mgf {
   final crypto.Hash hasher;
 
-  Mgf1({crypto.Hash hasher}) : hasher = hasher ?? crypto.sha1;
+  Mgf1({crypto.Hash? hasher}) : hasher = hasher ?? crypto.sha1;
 
   Uint8List encode(int blockSize, Iterable<int> input) {
     final inputLen = input.length;

@@ -56,7 +56,7 @@ List<int> emsaPkcs1v15Encode(List<int> msg, int outLength, EmsaHasher hasher) {
       ASN1Unknown(ASN1Type.objectIdentifierTag, hasher.asn1ObjectId),
       ASN1Null()
     ]),
-    ASN1OctetString(hashed)
+    ASN1OctetString(Uint8List.fromList(hashed))
   ]);
   final t = asn1.encode();
 

@@ -21,7 +21,7 @@ BigInt bytesToBigInt(Iterable<int> bytes) {
 
 /// Encode a BigInt into bytes using big-endian encoding.
 /// This is I2OSP as defined in rfc3447.
-Uint8List bigIntToBytes(BigInt number, {int outLen}) {
+Uint8List bigIntToBytes(BigInt number, {int? outLen}) {
   int size = (number.bitLength + 7) >> 3;
   if (outLen == null) {
     outLen = size;

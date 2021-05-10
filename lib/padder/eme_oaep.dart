@@ -16,13 +16,13 @@ class OAEPPadder implements Padder, IndividualBlockPadder {
 
   final Random random;
 
-  OAEPPadder({crypto.Hash hasher, Random random, Mgf mgf})
+  OAEPPadder({crypto.Hash? hasher, Random? random, Mgf? mgf})
       : random = random ?? Random.secure(),
         hasher = hasher ?? crypto.sha1,
         mgf = mgf ?? mgf1Sha1;
 
   void padBlock(int blockSize, Iterable<int> block, ByteData output,
-      {List<int> labelHash, /* String | List<int> */ label}) {
+      {List<int>? labelHash, /* String | List<int> */ label}) {
     if (labelHash == null) {
       if (label == null) label = <int>[];
 
@@ -80,7 +80,7 @@ class OAEPPadder implements Padder, IndividualBlockPadder {
   }
 
   Iterable<int> unpadBlock(int blockSize, Iterable<int> block,
-      {List<int> labelHash, /* String | List<int> */ label}) {
+      {List<int>? labelHash, /* String | List<int> */ label}) {
     if (block.length != blockSize) {
       throw Exception('Invalid blocksize');
     }

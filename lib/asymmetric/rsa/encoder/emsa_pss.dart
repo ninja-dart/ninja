@@ -12,7 +12,7 @@ class EmsaPssEncoder {
 
   final int saltLength;
 
-  EmsaPssEncoder({Mgf mgf, Hash hasher, this.saltLength = 0})
+  EmsaPssEncoder({Mgf? mgf, Hash? hasher, this.saltLength = 0})
       : mgf = mgf ?? mgf1Sha1,
         hasher = hasher ?? sha1;
 

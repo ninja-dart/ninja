@@ -1,3 +1,7 @@
+## 3.0.2
+
++ Null safety
+
 ## 3.0.1
 
 + Fixed typo bug for default oaepPadder for RSAPublicKey.encryptOaep method

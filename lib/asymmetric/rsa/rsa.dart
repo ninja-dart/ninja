@@ -56,7 +56,8 @@ class RSAPublicKey {
         throw Exception('Invalid structure');
       }
 
-      final ASN1ObjectIdentifier identifer = algIdentifier.children.first;
+      final ASN1ObjectIdentifier identifer =
+          algIdentifier.children.first as ASN1ObjectIdentifier;
 
       if (identifer.objectIdentifierAsString != '1.2.840.113549.1.1.1') {
         throw Exception('Invalid structure');
@@ -93,15 +94,15 @@ class RSAPublicKey {
   /// Public exponent
   final BigInt e;
 
-  RSAEncryptionEngine _engine;
+  RSAEncryptionEngine? _engine;
 
-  RSAEncryptionEngine get engine => _engine;
+  RSAEncryptionEngine get engine => _engine!;
 
   int get blockSize => engine.blockSize;
 
   int get bitSize => n.bitLength;
 
-  Iterable<int> encrypt(/* String | Iterable<int> */ input, {Padder padder}) {
+  Iterable<int> encrypt(/* String | Iterable<int> */ input, {Padder? padder}) {
     Iterable<int> inputBytes;
     if (input is String) {
       inputBytes = utf8.encode(input);
@@ -116,60 +117,63 @@ class RSAPublicKey {
     return engine.process(inputBytes);
   }
 
-  String encryptToBase64(/* String | Iterable<int> */ input, {Padder padder}) {
+  String encryptToBase64(/* String | Iterable<int> */ input, {Padder? padder}) {
     final bytes = encrypt(input, padder: padder);
-    return base64Encode(bytes);
+    return base64Encode(bytes.toList());
   }
 
-  String encryptToHex(/* String | Iterable<int> */ input, {Padder padder}) {
+  String encryptToHex(/* String | Iterable<int> */ input, {Padder? padder}) {
     return hexEncode(encrypt(input, padder: padder));
   }
 
   Iterable<int> encryptPkcs1v15(/* String | Iterable<int> */ input,
-      {Random rand}) {
+      {Random? rand}) {
     return encrypt(input, padder: EmePkcs1v15Encoder(rand: rand));
   }
 
   String encryptPkcs1v15ToBase64(/* String | Iterable<int> */ input,
-      {Random rand}) {
+      {Random? rand}) {
     return encryptToBase64(input, padder: EmePkcs1v15Encoder(rand: rand));
   }
 
   String encryptPkcs1v15ToHex(/* String | Iterable<int> */ input,
-      {Random rand}) {
+      {Random? rand}) {
     return encryptToHex(input, padder: EmePkcs1v15Encoder(rand: rand));
   }
 
   Iterable<int> encryptOaep(/* String | Iterable<int> */ input,
-      {OAEPPadder oaepPadder}) {
+      {OAEPPadder? oaepPadder}) {
     return encrypt(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   String encryptOaepToBase64(/* String | Iterable<int> */ input,
-      {OAEPPadder oaepPadder}) {
+      {OAEPPadder? oaepPadder}) {
     return encryptToBase64(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   String encryptOaepToHex(/* String | Iterable<int> */ input,
-      {OAEPPadder oaepPadder}) {
+      {OAEPPadder? oaepPadder}) {
     return encryptToHex(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   bool verifySsaPkcs1v15(/* String | List<int> | BigInt */ signature,
       final /* String | List<int> | BigInt */ msg,
-      {EmsaHasher hasher}) {
+      {EmsaHasher? hasher}) {
     return RsassaPkcs1v15Verifier(hasher: hasher).verify(this, signature, msg);
   }
 
   bool verifySsaPss(/* String | List<int> | BigInt */ signature,
       final /* String | List<int> | BigInt */ msg,
-      {Mgf mgf, Hash hasher, int saltLength = 10, RsaSsaPssVerifier verifier}) {
+      {Mgf? mgf,
+      Hash? hasher,
+      int saltLength = 10,
+      RsaSsaPssVerifier? verifier}) {
     verifier ??=
         RsaSsaPssVerifier(mgf: mgf, hasher: hasher, saltLength: saltLength);
     return verifier.verify(this, signature, msg);
   }
 
-  String toASN1({bool toPkcs1 = false, Iterable<ASN1Object> parameters}) {
+  String toASN1({bool toPkcs1 = false, Iterable<ASN1Object>? parameters}) {
     final encoded = ASN1Sequence([ASN1Integer(n), ASN1Integer(e)]).encode();
     if (toPkcs1) {
       return base64Encode(encoded);
@@ -201,7 +205,7 @@ class RSAPrivateKey {
   }
 
   factory RSAPrivateKey.fromPrimaries(BigInt p, BigInt q,
-      {BigInt publicExponent}) {
+      {BigInt? publicExponent}) {
     publicExponent ??= BigInt.from(0x01001);
 
     final n = p * q;
@@ -211,7 +215,7 @@ class RSAPrivateKey {
     return RSAPrivateKey(n, publicExponent, d, p, q);
   }
 
-  factory RSAPrivateKey.generate(int keySize, {BigInt publicExponent}) {
+  factory RSAPrivateKey.generate(int keySize, {BigInt? publicExponent}) {
     publicExponent ??= BigInt.from(0x01001);
 
     BigInt p;
@@ -289,7 +293,8 @@ class RSAPrivateKey {
         throw Exception('Invalid structure');
       }
 
-      final ASN1ObjectIdentifier identifer = algIdentifier.children.first;
+      final ASN1ObjectIdentifier identifer =
+          algIdentifier.children.first as ASN1ObjectIdentifier;
 
       if (identifer.objectIdentifierAsString != '1.2.840.113549.1.1.1') {
         throw Exception('Invalid structure');
@@ -336,16 +341,16 @@ class RSAPrivateKey {
   /// Prime q
   final BigInt q;
 
-  RSADecryptionEngine _engine;
+  RSADecryptionEngine? _engine;
 
-  RSADecryptionEngine get engine => _engine;
+  RSADecryptionEngine get engine => _engine!;
 
   int get blockSize => engine.blockSize;
 
   int get bitSize => n.bitLength;
 
   Iterable<int> decrypt(/* String | List<int> */ input,
-      {Padder padder, bool raw = false}) {
+      {Padder? padder, bool raw = false}) {
     Uint8List inputBytes;
     if (input is String) {
       inputBytes = base64Decode(input);
@@ -356,7 +361,7 @@ class RSAPrivateKey {
     } else {
       throw ArgumentError('Should be String or List<int>');
     }
-    Uint8List unpadded = engine.process(inputBytes, dontPadLastBlock: raw);
+    Iterable<int> unpadded = engine.process(inputBytes, dontPadLastBlock: raw);
     if (padder == null) {
       return unpadded;
     }
@@ -364,7 +369,7 @@ class RSAPrivateKey {
   }
 
   String decryptToUtf8(/* String | List<int> */ input,
-      {Padder padder, bool raw = false}) {
+      {Padder? padder, bool raw = false}) {
     return utf8.decode(decrypt(input, padder: padder, raw: raw).toList());
   }
 
@@ -377,31 +382,31 @@ class RSAPrivateKey {
   }
 
   Iterable<int> decryptOaep(/* String | List<int> */ input,
-      {OAEPPadder oaepPadder}) {
+      {OAEPPadder? oaepPadder}) {
     return decrypt(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   String decryptOaepToUtf8(/* String | List<int> */ input,
-      {OAEPPadder oaepPadder}) {
+      {OAEPPadder? oaepPadder}) {
     return decryptToUtf8(input, padder: oaepPadder ?? sha1OaepPadder);
   }
 
   List<int> signSsaPkcs1v15(final /* String | List<int> | BigInt */ msg,
-      {EmsaHasher hasher}) {
+      {EmsaHasher? hasher}) {
     return RsassaPkcs1v15Signer(hasher: hasher).sign(this, msg);
   }
 
   String signSsaPkcs1v15ToBase64(/* String | List<int> | BigInt */ msg,
-      {EmsaHasher hasher}) {
+      {EmsaHasher? hasher}) {
     return RsassaPkcs1v15Signer(hasher: hasher).signToBase64(this, msg);
   }
 
   Iterable<int> signPss(final /* String | List<int> | BigInt */ msg,
-      {Mgf mgf,
-      Hash hasher,
+      {Mgf? mgf,
+      Hash? hasher,
       int saltLength = 10,
-      Random saltGenerator,
-      RsaSsaPssSigner signer}) {
+      Random? saltGenerator,
+      RsaSsaPssSigner? signer}) {
     signer ??= RsaSsaPssSigner(
         mgf: mgf,
         hasher: hasher,
@@ -411,11 +416,11 @@ class RSAPrivateKey {
   }
 
   String signPssToBase64(final /* String | List<int> | BigInt */ msg,
-      {Mgf mgf,
-      Hash hasher,
+      {Mgf? mgf,
+      Hash? hasher,
       int saltLength = 10,
-      Random saltGenerator,
-      RsaSsaPssSigner signer}) {
+      Random? saltGenerator,
+      RsaSsaPssSigner? signer}) {
     signer ??= RsaSsaPssSigner(
         mgf: mgf,
         hasher: hasher,
@@ -426,7 +431,7 @@ class RSAPrivateKey {
 
   RSAPublicKey get toPublicKey => RSAPublicKey(n, e);
 
-  String toASN1({bool toPkcs1 = true, Iterable<ASN1Object> parameters}) {
+  String toASN1({bool toPkcs1 = true, Iterable<ASN1Object>? parameters}) {
     final dModP = d % (p - BigInt.from(1));
     final dModQ = d % (q - BigInt.from(1));
     final coefficient = q.modInverse(p);

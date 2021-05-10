@@ -11,7 +11,7 @@ class CbcBlockCipherMode {
   CbcBlockCipherMode();
 
   Uint8List encrypt(BlockCipher cipher, input,
-      {Iterable<int> iv, Padder padder = const PKCS7Padder()}) {
+      {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     Iterable<int> mangler;
     if (iv != null) {
       if (iv.length != cipher.blockSize) {
@@ -46,7 +46,7 @@ class CbcBlockCipherMode {
   }
 
   Iterable<int> decrypt(BlockCipher cipher, /* String | Uint8List */ input,
-      {Iterable<int> iv, Padder padder = const PKCS7Padder()}) {
+      {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     Iterable<int> mangler;
     if (iv != null) {
       if (iv.length != cipher.blockSize) {

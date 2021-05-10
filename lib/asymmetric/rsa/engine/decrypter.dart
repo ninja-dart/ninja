@@ -13,14 +13,19 @@ class RSADecryptionEngine {
 
   final int bitSize;
 
-  RSADecryptionEngine(this._key)
-      : bitSize = _key.n.bitLength,
-        blockSize = (_key.n.bitLength + 7) >> 3 {
-    BigInt pSub1 = (_key.p - BigInt.one);
-    BigInt qSub1 = (_key.q - BigInt.one);
-    _dP = _key.d.remainder(pSub1);
-    _dQ = _key.d.remainder(qSub1);
-    _qInv = _key.q.modInverse(_key.p);
+  RSADecryptionEngine._(
+      this._key, this._dP, this._dQ, this._qInv, this.blockSize, this.bitSize);
+
+  factory RSADecryptionEngine(RSAPrivateKey key) {
+    final bitSize = key.n.bitLength;
+    final blockSize = (key.n.bitLength + 7) >> 3;
+    BigInt pSub1 = (key.p - BigInt.one);
+    BigInt qSub1 = (key.q - BigInt.one);
+    BigInt dP = key.d.remainder(pSub1);
+    BigInt dQ = key.d.remainder(qSub1);
+    BigInt qInv = key.q.modInverse(key.p);
+
+    return RSADecryptionEngine._(key, dP, dQ, qInv, blockSize, bitSize);
   }
 
   Iterable<int> process(Iterable<int> data, {bool dontPadLastBlock = false}) {

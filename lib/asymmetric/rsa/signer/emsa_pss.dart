@@ -20,13 +20,13 @@ class RsaSsaPssSigner implements RsaSigner {
   final Random saltGenerator;
 
   RsaSsaPssSigner(
-      {Mgf mgf, Hash hasher, this.saltLength = 0, Random saltGenerator})
+      {Mgf? mgf, Hash? hasher, this.saltLength = 0, Random? saltGenerator})
       : mgf = mgf ?? mgf1Sha256,
         hasher = hasher ?? sha256,
         saltGenerator = saltGenerator ?? Random.secure();
 
   List<int> sign(RSAPrivateKey key, /* String | List<int> | BigInt */ msg,
-      {List<int> salt}) {
+      {List<int>? salt}) {
     int blockSize = key.blockSize;
     int emBits = key.bitSize - 1;
 
@@ -103,7 +103,7 @@ class RsaSsaPssSigner implements RsaSigner {
   }
 
   String signToBase64(RSAPrivateKey key, /* String | List<int> | BigInt */ msg,
-      {List<int> salt}) {
+      {List<int>? salt}) {
     final bytes = sign(key, msg, salt: salt);
     return base64Encode(bytes);
   }
@@ -116,7 +116,7 @@ class RsaSsaPssVerifier implements RsaVerifier {
 
   final int saltLength;
 
-  RsaSsaPssVerifier({Mgf mgf, Hash hasher, this.saltLength = 0})
+  RsaSsaPssVerifier({Mgf? mgf, Hash? hasher, this.saltLength = 0})
       : mgf = mgf ?? mgf1Sha256,
         hasher = hasher ?? sha256;
 

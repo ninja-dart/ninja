@@ -67,36 +67,36 @@ class AESKey {
 
   String decryptToUtf8(/* String | Uint8List */ input) {
     final bytes = decrypt(input);
-    return utf8.decode(bytes);
+    return utf8.decode(bytes.toList());
   }
 
   Uint8List encryptCbc(/* String | Uint8List */ input,
-      {Iterable<int> iv, Padder padder = const PKCS7Padder()}) {
+      {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     return cbcBlockCipherMode.encrypt(_encryptionEngine, input,
         iv: iv, padder: padder);
   }
 
   String encryptCbcToBase64(/* String | Iterable<int> */ input,
-      {Iterable<int> iv, Padder padder = const PKCS7Padder()}) {
+      {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     final encryptedBytes = encryptCbc(input, iv: iv, padder: padder);
     return base64Encode(encryptedBytes);
   }
 
   String encryptCbcToHex(/* String | Iterable<int> */ input,
-      {Iterable<int> iv, Padder padder = const PKCS7Padder()}) {
+      {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     final encryptedBytes = encryptCbc(input, iv: iv, padder: padder);
     return hexEncoder.convert(encryptedBytes);
   }
 
   Iterable<int> decryptCbc(/* String | Uint8List */ input,
-      {Iterable<int> iv, Padder padder = const PKCS7Padder()}) {
+      {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     return cbcBlockCipherMode.decrypt(_decryptionEngine, input,
         iv: iv, padder: padder);
   }
 
   String decryptCbcToUtf8(/* String | Uint8List */ input,
-      {Iterable<int> iv, Padder padder = const PKCS7Padder()}) {
+      {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     final bytes = decryptCbc(input, iv: iv, padder: padder);
-    return utf8.decode(bytes);
+    return utf8.decode(bytes.toList());
   }
 }
