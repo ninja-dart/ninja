@@ -36,6 +36,15 @@ Uint8List bigIntToBytes(BigInt number, {int? outLen}) {
   }
   return result;
 }
+
+extension BigIntUint8List on BigInt {
+  Uint8List asBytes({int? outLen}) => bigIntToBytes(this, outLen: outLen);
+}
+
+extension Uint8ListBigInt on Iterable<int> {
+  BigInt get asBigInt => bytesToBigInt(this);
+}
+
 // Not handling negative numbers. Decide how you want to do that.
 
 final _byteMask = BigInt.from(0xff);
