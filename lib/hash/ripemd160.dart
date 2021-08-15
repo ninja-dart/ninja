@@ -17,7 +17,7 @@ class RIPEMD160 extends Hash {
 
 /// An instance of [RIPEMD160].
 class _RIPEMD160Sink extends HashSink {
-  _RIPEMD160Sink(Sink<Digest> sink) : super(sink, 16) {
+  _RIPEMD160Sink(Sink<Digest> sink) : super(sink, 16, endian: Endian.little) {
     digest[0] = 0x67452301;
     digest[1] = 0xefcdab89;
     digest[2] = 0x98badcfe;
@@ -30,8 +30,6 @@ class _RIPEMD160Sink extends HashSink {
   @override
   void updateHash(Uint32List msg) {
     assert(msg.length == 16);
-    final chunk = msg.buffer.asUint8List();
-    // final chunk = List<int>(); //[97, 98, 99];
 
     var a = digest[0];
     var b = digest[1];
@@ -46,18 +44,16 @@ class _RIPEMD160Sink extends HashSink {
     var eh = e;
 
     for (var i = 0; i < 80; i++) {
-      var t = (_rotl32(
-                  (a + _f(i, b, c, d) + chunk[_r[i]] + _K(i)) & mask32, _s[i]) +
-              e) &
-          mask32;
+      final t0 = (a + _f(i, b, c, d) + msg[_r[i]] + _K(i)) & mask32;
+      final t1 = _rotl32(t0, _s[i]);
+      var t = (t1 + e) & mask32;
       a = e;
       e = d;
       d = _rotl32(c, 10);
       c = b;
       b = t;
       t = (_rotl32(
-                  (ah + _f(79 - i, bh, ch, dh) + chunk[_rh[i]] + _Kh(i)) &
-                      mask32,
+                  (ah + _f(79 - i, bh, ch, dh) + msg[_rh[i]] + _Kh(i)) & mask32,
                   _sh[i]) +
               eh) &
           mask32;

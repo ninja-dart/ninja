@@ -43,6 +43,7 @@ extension BigIntUint8List on BigInt {
 
 extension Uint8ListBigInt on Iterable<int> {
   BigInt get asBigInt => bytesToBigInt(this);
+  String get toHex => map((e) => e.hexByte).join();
 }
 
 // Not handling negative numbers. Decide how you want to do that.
@@ -73,4 +74,13 @@ String bigIntToHex(BigInt input) {
 
 BigInt hexToBigInt(String input) {
   return bytesToBigInt(hexDecode(input));
+}
+
+extension IntHex on int {
+  String get hexByte {
+    if (this > 255) {
+      throw Exception('invalid byte value. must be <= 255');
+    }
+    return toRadixString(16).padLeft(2, '0');
+  }
 }
