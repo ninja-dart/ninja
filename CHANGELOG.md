@@ -1,3 +1,7 @@
+## 3.0.3
+
++ RIPEMD160 hash
+
 ## 3.0.2
 
 + Null safety
