@@ -1,3 +1,10 @@
+## 3.0.4
+
+Breaking changes
+
++ Changed toHex from getter to function. Now it
+allows requesting for fixed length hex string.
+
 ## 3.0.3
 
 + RIPEMD160 hash

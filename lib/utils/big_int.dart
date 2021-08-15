@@ -43,7 +43,8 @@ extension BigIntUint8List on BigInt {
 
 extension Uint8ListBigInt on Iterable<int> {
   BigInt get asBigInt => bytesToBigInt(this);
-  String get toHex => map((e) => e.hexByte).join();
+  String toHex({int? outLen}) =>
+      map((e) => e.hexByte).join().padLeft(outLen ?? 0, '0');
 }
 
 // Not handling negative numbers. Decide how you want to do that.

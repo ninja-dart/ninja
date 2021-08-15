@@ -7,5 +7,6 @@ void perform(String msg) {
 
 void main() {
   // perform('ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890^_');
-  perform('''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890^_abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq()+?#'"!''');
+  perform(
+      '''ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz01234567890^_abcdbcdecdefdefgefghfghighijhijkijkljklmklmnlmnomnopnopq()+?#'"!''');
 }
