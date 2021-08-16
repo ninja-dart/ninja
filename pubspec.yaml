@@ -18,5 +18,5 @@ dependencies:
 
 dev_dependencies:
   test: ^1.17.10
-  pedantic:
+  pedantic: ^1.11.1
   ninja_openssl: ^1.0.4
