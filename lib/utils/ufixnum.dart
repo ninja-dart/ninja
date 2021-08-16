@@ -3,14 +3,14 @@
 
 library ninja.ufixnum;
 
-const _MASK_3 = 0x07;
-const _MASK_5 = 0x1F;
-const _MASK_6 = 0x3F;
-const _MASK_8 = 0xFF;
-const _MASK_16 = 0xFFFF;
-const _MASK_32 = 0xFFFFFFFF;
+const mask3 = 0x07;
+const mask5 = 0x1F;
+const mask6 = 0x3F;
+const mask8 = 0xFF;
+const mask16 = 0xFFFF;
+const mask32 = 0xFFFFFFFF;
 
-final _MASK32_HI_BITS = [
+final maskHiBits = [
   0xFFFFFFFF,
   0x7FFFFFFF,
   0x3FFFFFFF,
@@ -49,125 +49,125 @@ final _MASK32_HI_BITS = [
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 8 bit operations
 //
-int clip8(int x) => (x & _MASK_8);
+int clip8(int x) => (x & mask8);
 
 int csum8(int x, int y) => sum8(clip8(x), clip8(y));
 int sum8(int x, int y) {
-  assert((x >= 0) && (x <= _MASK_8));
-  assert((y >= 0) && (y <= _MASK_8));
-  return ((x + y) & _MASK_8);
+  assert((x >= 0) && (x <= mask8));
+  assert((y >= 0) && (y <= mask8));
+  return ((x + y) & mask8);
 }
 
 int csub8(int x, int y) => sub8(clip8(x), clip8(y));
 int sub8(int x, int y) {
-  assert((x >= 0) && (x <= _MASK_8));
-  assert((y >= 0) && (y <= _MASK_8));
-  return ((x - y) & _MASK_8);
+  assert((x >= 0) && (x <= mask8));
+  assert((y >= 0) && (y <= mask8));
+  return ((x - y) & mask8);
 }
 
 int cshiftl8(int x, int n) => shiftl8(clip8(x), n);
 int shiftl8(int x, int n) {
-  assert((x >= 0) && (x <= _MASK_8));
-  return ((x << (n & _MASK_3)) & _MASK_8);
+  assert((x >= 0) && (x <= mask8));
+  return ((x << (n & mask3)) & mask8);
 }
 
 int cshiftr8(int x, int n) => shiftr8(clip8(x), n);
 int shiftr8(int x, int n) {
-  assert((x >= 0) && (x <= _MASK_8));
-  return (x >> (n & _MASK_3));
+  assert((x >= 0) && (x <= mask8));
+  return (x >> (n & mask3));
 }
 
 int cneg8(int x) => neg8(clip8(x));
 int neg8(int x) {
-  assert((x >= 0) && (x <= _MASK_8));
-  return (-x & _MASK_8);
+  assert((x >= 0) && (x <= mask8));
+  return (-x & mask8);
 }
 
 int cnot8(int x) => not8(clip8(x));
 int not8(int x) {
-  assert((x >= 0) && (x <= _MASK_8));
-  return (~x & _MASK_8);
+  assert((x >= 0) && (x <= mask8));
+  return (~x & mask8);
 }
 
 int crotl8(int x, int n) => rotl8(clip8(x), n);
 int rotl8(int x, int n) {
   assert(n >= 0);
-  assert((x >= 0) && (x <= _MASK_8));
-  n &= _MASK_3;
-  return ((x << n) & _MASK_8) | (x >> (8 - n));
+  assert((x >= 0) && (x <= mask8));
+  n &= mask3;
+  return ((x << n) & mask8) | (x >> (8 - n));
 }
 
 int crotr8(int x, int n) => rotr8(clip8(x), n);
 int rotr8(int x, int n) {
   assert(n >= 0);
-  assert((x >= 0) && (x <= _MASK_8));
-  n &= _MASK_3;
-  return ((x >> n) & _MASK_8) | ((x << (8 - n)) & _MASK_8);
+  assert((x >= 0) && (x <= mask8));
+  n &= mask3;
+  return ((x >> n) & mask8) | ((x << (8 - n)) & mask8);
 }
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 16 bit operations
 //
-int clip16(int x) => (x & _MASK_16);
+int clip16(int x) => (x & mask16);
 
 ////////////////////////////////////////////////////////////////////////////////////////////////////
 // 32 bit operations
 //
-int clip32(int x) => (x & _MASK_32);
+int clip32(int x) => (x & mask32);
 
 int csum32(int x, int y) => sum32(clip32(x), clip32(y));
 int sum32(int x, int y) {
-  assert((x >= 0) && (x <= _MASK_32));
-  assert((y >= 0) && (y <= _MASK_32));
-  return ((x + y) & _MASK_32);
+  assert((x >= 0) && (x <= mask32));
+  assert((y >= 0) && (y <= mask32));
+  return ((x + y) & mask32);
 }
 
 int csub32(int x, int y) => sub32(clip32(x), clip32(y));
 int sub32(int x, int y) {
-  assert((x >= 0) && (x <= _MASK_32));
-  assert((y >= 0) && (y <= _MASK_32));
-  return ((x - y) & _MASK_32);
+  assert((x >= 0) && (x <= mask32));
+  assert((y >= 0) && (y <= mask32));
+  return ((x - y) & mask32);
 }
 
 int cshiftl32(int x, int n) => shiftl32(clip32(x), n);
 int shiftl32(int x, int n) {
-  assert((x >= 0) && (x <= _MASK_32));
-  n &= _MASK_5;
-  x &= _MASK32_HI_BITS[n];
-  return ((x << n) & _MASK_32);
+  assert((x >= 0) && (x <= mask32));
+  n &= mask5;
+  x &= maskHiBits[n];
+  return ((x << n) & mask32);
 }
 
 int cshiftr32(int x, int n) => shiftr32(clip32(x), n);
 int shiftr32(int x, int n) {
-  assert((x >= 0) && (x <= _MASK_32));
-  n &= _MASK_5;
+  assert((x >= 0) && (x <= mask32));
+  n &= mask5;
   return (x >> n);
 }
 
 int cneg32(int x) => neg32(clip32(x));
 int neg32(int x) {
-  assert((x >= 0) && (x <= _MASK_32));
-  return (-x & _MASK_32);
+  assert((x >= 0) && (x <= mask32));
+  return (-x & mask32);
 }
 
 int cnot32(int x) => not32(clip32(x));
 int not32(int x) {
-  assert((x >= 0) && (x <= _MASK_32));
-  return (~x & _MASK_32);
+  assert((x >= 0) && (x <= mask32));
+  return (~x & mask32);
 }
 
 int crotl32(int x, int n) => rotl32(clip32(x), n);
 int rotl32(int x, int n) {
   assert(n >= 0);
-  assert((x >= 0) && (x <= _MASK_32));
-  n &= _MASK_5;
+  assert((x >= 0) && (x <= mask32));
+  n &= mask5;
   return shiftl32(x, n) | (x >> (32 - n));
 }
 
 int crotr32(int x, int n) => rotr32(clip32(x), n);
 int rotr32(int x, int n) {
   assert(n >= 0);
-  assert((x >= 0) && (x <= _MASK_32));
-  n &= _MASK_5;
+  assert((x >= 0) && (x <= mask32));
+  n &= mask5;
   return (x >> n) | shiftl32(x, (32 - n));
 }

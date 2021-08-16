@@ -1,3 +1,7 @@
+## 3.0.5
+
++ Added `DigestSink`
+
 ## 3.0.4
 
 Breaking changes
