@@ -6,7 +6,7 @@ import 'package:ninja/ninja.dart';
 extension DigestExt on Digest {
   String get asHex => bigIntToHex(asBigInt);
 
-  BigInt get asBigInt => bytes.asBigInt;
+  BigInt get asBigInt => bytes.asBigInt();
 }
 
 /// A sink used to get a digest value out of `Hash.startChunkedConversion`.

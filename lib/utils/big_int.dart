@@ -3,13 +3,13 @@ import 'dart:typed_data';
 
 import 'package:ninja_hex/ninja_hex.dart';
 
-// This file has been copied and modified from pointy_castles package. See file
-// LICENSE/pointy_castle_LICENSE file for more information.
-
-/// Decode a BigInt from bytes in big-endian encoding.
+/// Decodes the provided [BigInt] from bytes.
 /// This is OS2IP as defined in rfc3447.
-BigInt bytesToBigInt(Iterable<int> bytes) {
+BigInt bytesToBigInt(Iterable<int> bytes, {Endian endian = Endian.big}) {
   BigInt result = BigInt.from(0);
+  if (endian == Endian.little) {
+    bytes = bytes.toList().reversed;
+  }
 
   for (int byte in bytes) {
     result = result << 8;
@@ -21,7 +21,8 @@ BigInt bytesToBigInt(Iterable<int> bytes) {
 
 /// Encode a BigInt into bytes using big-endian encoding.
 /// This is I2OSP as defined in rfc3447.
-Uint8List bigIntToBytes(BigInt number, {int? outLen}) {
+Uint8List bigIntToBytes(BigInt number,
+    {int? outLen, Endian endian = Endian.big}) {
   int size = (number.bitLength + 7) >> 3;
   if (outLen == null) {
     outLen = size;
@@ -29,20 +30,27 @@ Uint8List bigIntToBytes(BigInt number, {int? outLen}) {
     throw Exception('Number too large');
   }
   final result = Uint8List(outLen);
-  int pos = outLen - 1;
+  int pos = endian == Endian.big ? outLen - 1 : 0;
   for (int i = 0; i < size; i++) {
-    result[pos--] = (number & _byteMask).toInt();
+    result[pos] = (number & _byteMask).toInt();
+    if (endian == Endian.big) {
+      pos -= 1;
+    } else {
+      pos += 1;
+    }
     number = number >> 8;
   }
   return result;
 }
 
 extension BigIntUint8List on BigInt {
-  Uint8List asBytes({int? outLen}) => bigIntToBytes(this, outLen: outLen);
+  Uint8List asBytes({int? outLen, Endian endian = Endian.big}) =>
+      bigIntToBytes(this, outLen: outLen, endian: endian);
 }
 
 extension Uint8ListBigInt on Iterable<int> {
-  BigInt get asBigInt => bytesToBigInt(this);
+  BigInt asBigInt({Endian endian = Endian.big}) =>
+      bytesToBigInt(this, endian: endian);
   String toHex({int? outLen}) =>
       map((e) => e.hexByte).join().padLeft(outLen ?? 0, '0');
 }

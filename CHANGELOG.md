@@ -1,3 +1,11 @@
+## 3.0.6
+
++ Little endian support for byte to BigInt conversion.
+
+Breaking change:
+
++ Uint8ListBigInt.asBigInt is converted from getter to method
+
 ## 3.0.5
 
 + Added `DigestSink`
