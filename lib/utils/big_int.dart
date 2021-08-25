@@ -51,8 +51,12 @@ extension BigIntUint8List on BigInt {
 extension Uint8ListBigInt on Iterable<int> {
   BigInt asBigInt({Endian endian = Endian.big}) =>
       bytesToBigInt(this, endian: endian);
-  String toHex({int? outLen}) =>
-      map((e) => e.hexByte).join().padLeft(outLen ?? 0, '0');
+
+  String toHex({int? outLen, Endian endian = Endian.big}) =>
+      (endian == Endian.big ? this : this.toList().reversed)
+          .map((e) => e.hexByte)
+          .join()
+          .padLeft(outLen ?? 0, '0');
 }
 
 // Not handling negative numbers. Decide how you want to do that.

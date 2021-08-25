@@ -1,3 +1,7 @@
+## 3.0.7
+
++ Uint8ListBigInt.toHex is endian aware
+
 ## 3.0.6
 
 + Little endian support for byte to BigInt conversion.

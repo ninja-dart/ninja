@@ -1,6 +1,6 @@
 name: ninja
 description: Cryptography dart library to encrypt, decrypt, sign and verify messages
-version: 3.0.6
+version: 3.0.7
 homepage: https://github.com/ninja-dart/ninja
 
 documentation:
