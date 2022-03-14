@@ -1,7 +1,6 @@
 import 'dart:convert';
 import 'dart:typed_data';
 
-import 'package:ninja/block_cipher/block_cipher.dart';
 import 'package:ninja/ninja.dart';
 import 'package:ninja/utils/listops.dart';
 
@@ -10,7 +9,7 @@ final cbcBlockCipherMode = CbcBlockCipherMode();
 class CbcBlockCipherMode {
   CbcBlockCipherMode();
 
-  Uint8List encrypt(BlockCipher cipher, input,
+  Uint8List encrypt(BlockCipher cipher, /* String | Iterable<int> */ input,
       {Iterable<int>? iv, Padder padder = const PKCS7Padder()}) {
     Iterable<int> mangler;
     if (iv != null) {
