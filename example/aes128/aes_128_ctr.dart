@@ -13,7 +13,7 @@ void main() {
   print(key.toHex());
   print(iv.toHex());
   final aes = AESKey(key);
-  String encoded = aes.encryptCtrToBase64('Dart', iv: iv);
+  String encoded = aes.encryptCtrToBase64('erqwerqwrqwerqwerqwerwqerqwerqwerqwerqwerqwerqwr', iv: iv);
   print(encoded);
   print(base64Decode(encoded).toHex());
   String decoded = aes.decryptCtrToUtf8(encoded, iv: iv);

@@ -13,7 +13,7 @@ dependencies:
   ninja_prime: ^2.0.0
   ninja_pem: ^2.0.0
   ninja_asn1: ^2.0.0
-  ninja_hex: ^2.0.0
+  ninja_hex: ^2.0.1
   collection: ^1.15.0
 
 dev_dependencies:
