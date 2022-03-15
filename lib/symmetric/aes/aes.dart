@@ -99,4 +99,34 @@ class AESKey {
     final bytes = decryptCbc(input, iv: iv, padder: padder);
     return utf8.decode(bytes.toList());
   }
+
+  Uint8List encryptCtr(/* String | Uint8List */ input,
+      {required Uint8List iv, Padder? padder}) {
+    return ctrBlockCipherMode.encrypt(_encryptionEngine, input,
+        iv: iv, padder: padder);
+  }
+
+  String encryptCtrToBase64(/* String | Iterable<int> */ input,
+      {required Uint8List iv, Padder? padder}) {
+    final encryptedBytes = encryptCtr(input, iv: iv, padder: padder);
+    return base64Encode(encryptedBytes);
+  }
+
+  String encryptCtrToHex(/* String | Iterable<int> */ input,
+      {required Uint8List iv, Padder? padder}) {
+    final encryptedBytes = encryptCtr(input, iv: iv, padder: padder);
+    return hexEncoder.convert(encryptedBytes);
+  }
+
+  Iterable<int> decryptCtr(/* String | Uint8List */ input,
+      {required Uint8List iv, Padder? padder}) {
+    return ctrBlockCipherMode.decrypt(_encryptionEngine, input,
+        iv: iv, padder: padder);
+  }
+
+  String decryptCtrToUtf8(/* String | Uint8List */ input,
+      {required Uint8List iv, Padder? padder}) {
+    final bytes = decryptCtr(input, iv: iv, padder: padder);
+    return utf8.decode(bytes.toList());
+  }
 }
