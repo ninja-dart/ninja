@@ -1,3 +1,7 @@
+## 3.0.8
+
++ CTR block mode support
+
 ## 3.0.7
 
 + Uint8ListBigInt.toHex is endian aware

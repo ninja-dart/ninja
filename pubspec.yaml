@@ -1,6 +1,6 @@
 name: ninja
 description: Cryptography dart library to encrypt, decrypt, sign and verify messages
-version: 3.0.7
+version: 3.0.8
 homepage: https://github.com/ninja-dart/ninja
 
 documentation:
@@ -20,3 +20,12 @@ dev_dependencies:
   test: ^1.17.10
   pedantic: ^1.11.1
   ninja_openssl: ^1.0.4
+
+false_secrets:
+  - /README.md
+  - /example/rsa/pem_example.dart
+  - /example/rsa/pss_signature.dart
+  - /example/rsa/rsa_oaep_encryption.dart
+  - /example/rsa/rsa_pkcs11v15_signature_example.dart
+  - /example/rsa/rsa_pkcs1v15_encryption.dart
+  - /test/rsa/pem_test.dart

@@ -202,4 +202,9 @@ main() {
 
 + [ ] AES key derivation
 + [ ] More block cipher modes
+    + [ ] CFB
+    + [ ] OFB
+    + [ ] GCM
+    + [ ] ECB
+    + [ ] PCBC
 + [ ] Curve based cryptography
